@@ -120,6 +120,42 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
     }
   };
 
+  const getDisplayScores = () => {
+    if (loading || error) return [];
+    if (!result || !isTop20) {
+      return scores.map((row) => ({ ...row, isNewBadge: false, isPreview: false }));
+    }
+
+    if (submitted) {
+      return scores.map((row) => {
+        const isMy = (myScoreId && Number(row.id) === Number(myScoreId)) ||
+                     (!myScoreId && row.score === result.totalMs && row.player_names === (playerName.trim() || 'AAAA'));
+        return { ...row, isNewBadge: isMy, isPreview: false };
+      });
+    }
+
+    const previewItem = {
+      id: 'temp-preview-item',
+      player_names: playerName.trim() || 'AAAA',
+      score: result.totalMs,
+      created_at: null,
+      isNewBadge: true,
+      isPreview: true,
+    };
+
+    const combined = [...scores.map(r => ({ ...r, isNewBadge: false, isPreview: false })), previewItem];
+    combined.sort((a, b) => {
+      if (a.score !== b.score) return a.score - b.score;
+      if (a.id === 'temp-preview-item') return -1;
+      if (b.id === 'temp-preview-item') return 1;
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
+
+    return combined.slice(0, 20);
+  };
+
+  const displayScores = getDisplayScores();
+
   return (
     <div className="leaderboard-screen">
       <div className="leaderboard-header">
@@ -192,13 +228,13 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
           </div>
         )}
 
-        {!loading && !error && scores.length === 0 && (
+        {!loading && !error && displayScores.length === 0 && (
           <div className="empty-state">
             <p>아직 등록된 기록이 없습니다. 첫 번째 명예의 전당 주인공이 되어보세요!</p>
           </div>
         )}
 
-        {!loading && !error && scores.length > 0 && (
+        {!loading && !error && displayScores.length > 0 && (
           <div className="table-wrapper">
             <table className="leaderboard-table">
               <thead>
@@ -210,22 +246,22 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
                 </tr>
               </thead>
               <tbody>
-                {scores.map((row, idx) => {
+                {displayScores.map((row, idx) => {
                   const rank = idx + 1;
                   const isTop3 = rank <= 3;
-                  const isMyRow = submitted && (
-                    (myScoreId && Number(row.id) === Number(myScoreId)) ||
-                    (!myScoreId && row.score === result?.totalMs && row.player_names === (playerName.trim() || 'AAAA'))
-                  );
+                  const isMyRow = row.isNewBadge;
                   return (
                     <tr key={row.id || idx} className={`rank-row ${isTop3 ? `top-${rank}` : ''} ${isMyRow ? 'my-rank-row' : ''}`}>
                       <td className="td-rank">
                         <span className="rank-badge">{rank}</span>
                         {isMyRow && <span className="my-badge">ME</span>}
                       </td>
-                      <td className="td-name">{row.player_names}</td>
+                      <td className="td-name">
+                        {row.player_names}
+                        {isMyRow && <span className="new-badge">신규!</span>}
+                      </td>
                       <td className="td-score">{formatTime(row.score)}</td>
-                      <td className="td-date">{formatDate(row.created_at)}</td>
+                      <td className="td-date">{row.isPreview ? '[ 등록 대기중 ]' : formatDate(row.created_at)}</td>
                     </tr>
                   );
                 })}
