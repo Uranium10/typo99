@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://typo99.vercel.app/sitemap.xml
