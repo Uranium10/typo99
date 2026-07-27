@@ -165,25 +165,29 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
   return (
     <div className="leaderboard-screen">
       <div className="leaderboard-header">
-        <h1 className="leaderboard-title">LEADERBOARD</h1>
+        <h1 className="leaderboard-title">
+          {leaderboardMode === 'hell' ? 'HELL LEADERBOARD' : 'LEADERBOARD'}
+        </h1>
       </div>
 
-      <div className="leaderboard-tabs">
-        <button
-          type="button"
-          className={`lb-tab-btn ${leaderboardMode === 'normal' ? 'active' : ''}`}
-          onClick={() => { sound.playBtnClick(); setLeaderboardMode('normal'); }}
-        >
-          일반 모드
-        </button>
-        <button
-          type="button"
-          className={`lb-tab-btn ${leaderboardMode === 'hell' ? 'active hell-active' : ''}`}
-          onClick={() => { sound.playBtnClick(); setLeaderboardMode('hell'); }}
-        >
-          지옥모드
-        </button>
-      </div>
+      {!result && (
+        <div className="leaderboard-tabs">
+          <button
+            type="button"
+            className={`lb-tab-btn ${leaderboardMode === 'normal' ? 'active' : ''}`}
+            onClick={() => { sound.playBtnClick(); setLeaderboardMode('normal'); }}
+          >
+            일반 모드
+          </button>
+          <button
+            type="button"
+            className={`lb-tab-btn ${leaderboardMode === 'hell' ? 'active hell-active' : ''}`}
+            onClick={() => { sound.playBtnClick(); setLeaderboardMode('hell'); }}
+          >
+            지옥모드
+          </button>
+        </div>
+      )}
 
       {!loading && !error && result && isMatchingMode && (
         <div className="registration-card">
