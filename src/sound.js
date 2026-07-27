@@ -1,6 +1,7 @@
 // Web Audio Engine with Splice High-Quality Audio Samples for TYPO99
 import clickUrl from './assets/sounds/wv_button_click_general.mp3';
 import hoverUrl from './assets/sounds/wv_button_hovermp3.mp3';
+import gameoverUrl from './assets/sounds/wv_gameover.mp3';
 import eraseUrl from './assets/sounds/wv_key_erase.mp3';
 import inputUrl from './assets/sounds/wv_key_input.mp3';
 import countdownUrl from './assets/sounds/wv_pregame_countdown.mp3';
@@ -16,6 +17,7 @@ class SoundEngine {
     this.urls = {
       click: clickUrl,
       hover: hoverUrl,
+      gameover: gameoverUrl,
       erase: eraseUrl,
       input: inputUrl,
       countdown: countdownUrl,
@@ -125,6 +127,11 @@ class SoundEngine {
   // Game start button click / Clear sound
   playStart() {
     this.playBuffer('start', 0.65);
+  }
+
+  // Game Over / Mission Clear sound
+  playGameOver() {
+    this.playBuffer('gameover', 0.75);
   }
 }
 

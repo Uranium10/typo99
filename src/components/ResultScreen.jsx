@@ -3,7 +3,7 @@ import { sound } from '../sound';
 
 export default function ResultScreen({ result, onOpenLeaderboard }) {
   React.useEffect(() => {
-    sound.playStart();
+    sound.playGameOver();
   }, []);
 
   const formatTime = (ms) => {
