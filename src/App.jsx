@@ -83,7 +83,7 @@ export default function App() {
           <LeaderboardScreen
             result={gameResult}
             onScoreSubmitted={() => setGameResult(null)}
-            onStartGame={() => handleStartGame(gameResult?.mode || gameMode || 'normal')}
+            onStartGame={(targetMode) => handleStartGame(targetMode || gameResult?.mode || gameMode || 'normal')}
             onBackToMain={handleBackToMain}
           />
         )}

@@ -13,11 +13,13 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
   const [myRank, setMyRank] = useState(null);
   const [myScoreId, setMyScoreId] = useState(null);
 
-  const loadScores = async (isMounted = true) => {
+  const [leaderboardMode, setLeaderboardMode] = useState(result?.mode || 'normal');
+
+  const loadScores = async (targetMode = leaderboardMode, isMounted = true) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/scores');
+      const res = await fetch(`/api/scores?mode=${targetMode}`);
       if (!res.ok) throw new Error('순위표를 불러오는데 실패했습니다');
       const data = await res.json();
       if (isMounted) {
@@ -35,15 +37,16 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
 
   useEffect(() => {
     let isMounted = true;
-    loadScores(isMounted);
+    loadScores(leaderboardMode, isMounted);
     return () => { isMounted = false; };
-  }, []);
+  }, [leaderboardMode]);
 
   const formatTime = (ms) => {
-    const totalSec = Math.floor(ms / 1000);
+    const cleanMs = Math.floor(Number(ms) || 0);
+    const totalSec = Math.floor(cleanMs / 1000);
     const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
     const s = String(totalSec % 60).padStart(2, '0');
-    const mili = String(ms % 1000).padStart(3, '0');
+    const mili = String(cleanMs % 1000).padStart(3, '0');
     return `${m}:${s}:${mili}`;
   };
 
@@ -57,8 +60,10 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
     }
   };
 
+  const isMatchingMode = !result || (leaderboardMode === (result.mode || 'normal'));
+
   const getEstimatedRank = () => {
-    if (!result || loading) return 1;
+    if (!result || loading || !isMatchingMode) return 1;
     let rank = 1;
     for (let i = 0; i < scores.length; i++) {
       if (result.totalMs >= scores[i].score) {
@@ -71,7 +76,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
   };
 
   const estimatedRank = getEstimatedRank();
-  const isTop20 = !loading && result && (scores.length < 20 || estimatedRank <= 20);
+  const isTop20 = !loading && result && isMatchingMode && (scores.length < 20 || estimatedRank <= 20);
 
   const handleSubmitScore = async (e) => {
     e && e.preventDefault();
@@ -89,6 +94,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
         body: JSON.stringify({
           player_names: finalName.slice(0, 15),
           score: result.totalMs,
+          mode: result.mode || 'normal',
         }),
       });
 
@@ -108,7 +114,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
       if (data.insertedId) setMyScoreId(data.insertedId);
       setSubmitted(true);
       sound.playCorrect();
-      await loadScores(true);
+      await loadScores(result.mode || 'normal', true);
       if (onScoreSubmitted) {
         onScoreSubmitted();
       }
@@ -122,7 +128,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
 
   const getDisplayScores = () => {
     if (loading || error) return [];
-    if (!result || !isTop20) {
+    if (!result || !isTop20 || !isMatchingMode) {
       return scores.map((row) => ({ ...row, isNewBadge: false, isPreview: false }));
     }
 
@@ -162,7 +168,24 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
         <h1 className="leaderboard-title">LEADERBOARD</h1>
       </div>
 
-      {!loading && !error && result && (
+      <div className="leaderboard-tabs">
+        <button
+          type="button"
+          className={`lb-tab-btn ${leaderboardMode === 'normal' ? 'active' : ''}`}
+          onClick={() => { sound.playBtnClick(); setLeaderboardMode('normal'); }}
+        >
+          일반 모드
+        </button>
+        <button
+          type="button"
+          className={`lb-tab-btn ${leaderboardMode === 'hell' ? 'active hell-active' : ''}`}
+          onClick={() => { sound.playBtnClick(); setLeaderboardMode('hell'); }}
+        >
+          지옥모드
+        </button>
+      </div>
+
+      {!loading && !error && result && isMatchingMode && (
         <div className="registration-card">
           {!submitted ? (
             isTop20 ? (
@@ -282,10 +305,10 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
           className="main-action-btn"
           onClick={() => {
             sound.playStart();
-            onStartGame();
+            onStartGame(leaderboardMode);
           }}
         >
-          {result?.mode === 'hell' ? '🔥 지옥모드 다시 하기 🔥' : '바로 게임 시작하기'}
+          {leaderboardMode === 'hell' ? '지옥모드 시작하기' : '바로 게임 시작하기'}
         </button>
         <button
           className="back-btn"

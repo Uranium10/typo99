@@ -95,7 +95,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     if (countdown === null) {
       startTimeRef.current = performance.now();
       const updateTimer = () => {
-        setElapsedMs(performance.now() - startTimeRef.current);
+        setElapsedMs(Math.floor(performance.now() - startTimeRef.current));
         timerRef.current = requestAnimationFrame(updateTimer);
       };
       timerRef.current = requestAnimationFrame(updateTimer);
@@ -121,33 +121,14 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
       setTimeout(() => {
         cancelAnimationFrame(timerRef.current);
         onGameOver({
-          totalMs: elapsedMs,
+          totalMs: Math.floor(elapsedMs),
           correct: newCorrect,
           wrong: newWrong,
           penalties: newWrong * 800,
           mode: mode || 'normal',
         });
       }, 500);
-      return;
-    }
-
-    if (isCorrect) {
-      // Immediate transition for correct answers
-      setAnimState('out');
-      sound.playSwoosh();
-      setTimeout(() => {
-        setFeedback(null);
-        setProblem((prev) => generateProblem(prev, mode));
-        setInputVal('');
-        setAnimState('in');
-        setTimeout(() => {
-          setAnimState('idle');
-          isTransitioningRef.current = false;
-          if (inputRef.current) inputRef.current.focus();
-        }, 120);
-      }, 100);
     } else {
-      // Wrong answer: show explosion for 0.8s (800ms) delay penalty while timer keeps ticking
       setTimeout(() => {
         setProblem((prev) => generateProblem(prev, mode));
         setInputVal('');
@@ -159,9 +140,9 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
           isTransitioningRef.current = false;
           if (inputRef.current) inputRef.current.focus();
         }, 150);
-      }, 800);
+      }, isCorrect ? 100 : 800);
     }
-  }, [correctCount, wrongCount, elapsedMs, onGameOver]);
+  }, [correctCount, wrongCount, elapsedMs, mode, onGameOver]);
 
   const handleInputChange = (e) => {
     if (isTransitioningRef.current || feedback || countdown !== null) return;
@@ -193,6 +174,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         setFeedback('correct');
         setCorrectCount((c) => c + 1);
         sound.playCorrect();
+        setAnimState('out');
         handleNextProblem(true);
       } else {
         setFeedback('wrong');
@@ -217,10 +199,11 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
   };
 
   const formatTime = (ms) => {
-    const totalSec = Math.floor(ms / 1000);
+    const cleanMs = Math.floor(Number(ms) || 0);
+    const totalSec = Math.floor(cleanMs / 1000);
     const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
     const s = String(totalSec % 60).padStart(2, '0');
-    const mili = String(ms % 1000).padStart(3, '0');
+    const mili = String(cleanMs % 1000).padStart(3, '0');
     return `${m}:${s}:${mili}`;
   };
 

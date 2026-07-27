@@ -31,10 +31,28 @@ function localApiPlugin() {
 
         const client = createClient({ url, authToken });
 
+        const isHell = req.url && req.url.includes('mode=hell');
+        const getTable = (modeFlag) => (isHell || modeFlag === 'hell') ? 'typo99_hell_scores' : 'typo99_scores';
+
+        const initTable = async (tbl) => {
+          try {
+            await client.execute(`CREATE TABLE IF NOT EXISTS ${tbl} (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              player_names TEXT NOT NULL,
+              score INTEGER NOT NULL,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`);
+          } catch (err) {
+            console.error('Table init error:', err);
+          }
+        };
+
         if (req.method === 'GET') {
+          const table = getTable();
+          await initTable(table);
           try {
             const result = await client.execute(
-              "SELECT id, player_names, score, created_at FROM typo99_scores ORDER BY score ASC, created_at ASC LIMIT 20"
+              `SELECT id, player_names, score, created_at FROM ${table} ORDER BY score ASC, created_at ASC LIMIT 20`
             );
             return res.status(200).json({ scores: result.rows });
           } catch (error) {
@@ -47,16 +65,18 @@ function localApiPlugin() {
           req.on('end', async () => {
             try {
               const parsed = body ? JSON.parse(body) : {};
-              const { player_names, score } = parsed;
+              const { player_names, score, mode } = parsed;
               if (!player_names || typeof score !== 'number') {
                 return res.status(400).json({ error: 'Invalid input' });
               }
 
+              const table = getTable(mode);
+              await initTable(table);
               const numScore = Math.round(score);
 
               // 1. Check current Top 20 scores
               const currentTop = await client.execute(
-                "SELECT id, score FROM typo99_scores ORDER BY score ASC, created_at ASC LIMIT 20"
+                `SELECT id, score FROM ${table} ORDER BY score ASC, created_at ASC LIMIT 20`
               );
 
               // 2. If already 20 scores and new score is worse than or equal to 20th place, do not insert
@@ -66,13 +86,13 @@ function localApiPlugin() {
 
               // 3. Insert new qualifying score
               await client.execute({
-                sql: "INSERT INTO typo99_scores (player_names, score) VALUES (?, ?)",
+                sql: `INSERT INTO ${table} (player_names, score) VALUES (?, ?)`,
                 args: [String(player_names).trim().slice(0, 15), numScore]
               });
 
               // 4. Delete any records outside the Top 20
               await client.execute(
-                "DELETE FROM typo99_scores WHERE id NOT IN (SELECT id FROM typo99_scores ORDER BY score ASC, created_at ASC LIMIT 20)"
+                `DELETE FROM ${table} WHERE id NOT IN (SELECT id FROM ${table} ORDER BY score ASC, created_at ASC LIMIT 20)`
               );
 
               return res.status(200).json({ success: true, inserted: true });

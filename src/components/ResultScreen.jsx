@@ -7,10 +7,11 @@ export default function ResultScreen({ result, onOpenLeaderboard }) {
   }, []);
 
   const formatTime = (ms) => {
-    const totalSec = Math.floor(ms / 1000);
+    const cleanMs = Math.floor(Number(ms) || 0);
+    const totalSec = Math.floor(cleanMs / 1000);
     const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
     const s = String(totalSec % 60).padStart(2, '0');
-    const mili = String(ms % 1000).padStart(3, '0');
+    const mili = String(cleanMs % 1000).padStart(3, '0');
     return `${m}:${s}:${mili}`;
   };
 
@@ -24,7 +25,7 @@ export default function ResultScreen({ result, onOpenLeaderboard }) {
 
       <div className="result-card">
         {result?.mode === 'hell' && (
-          <div className="hell-badge-result">👹 지옥모드 (2자릿수 연산 + 19단) 돌파! 👹</div>
+          <div className="hell-badge-result"> 지옥모드 클리어!</div>
         )}
         <div className="time-display">
           <span className="time-label">최종 기록</span>
