@@ -27,6 +27,7 @@ class SoundEngine {
       wrong: wrongUrl,
     };
     this.loadingPromise = null;
+    this.activeGameOver = null;
   }
 
   init() {
@@ -72,6 +73,7 @@ class SoundEngine {
         source.connect(gain);
         gain.connect(this.ctx.destination);
         source.start(0);
+        return { source, audio: null };
       } catch (e) {}
     } else {
       // Fallback if AudioContext buffer is loading or suspended
@@ -80,7 +82,28 @@ class SoundEngine {
         audio.volume = volume;
         audio.playbackRate = rate;
         audio.play().catch(() => {});
+        return { source: null, audio };
       } catch (e) {}
+    }
+    return { source: null, audio: null };
+  }
+
+  // Stop currently playing game over audio immediately
+  stopGameOver() {
+    if (this.activeGameOver) {
+      if (this.activeGameOver.source) {
+        try {
+          this.activeGameOver.source.stop();
+          this.activeGameOver.source.disconnect();
+        } catch (e) {}
+      }
+      if (this.activeGameOver.audio) {
+        try {
+          this.activeGameOver.audio.pause();
+          this.activeGameOver.audio.currentTime = 0;
+        } catch (e) {}
+      }
+      this.activeGameOver = null;
     }
   }
 
@@ -96,6 +119,7 @@ class SoundEngine {
 
   // UI Button click
   playType() {
+    this.stopGameOver();
     this.playBuffer('click', 0.4);
   }
 
@@ -116,6 +140,7 @@ class SoundEngine {
 
   // Countdown beep (3, 2, 1)
   playCountdown() {
+    this.stopGameOver();
     this.playBuffer('countdown', 0.65);
   }
 
@@ -126,12 +151,14 @@ class SoundEngine {
 
   // Game start button click / Clear sound
   playStart() {
+    this.stopGameOver();
     this.playBuffer('start', 0.65);
   }
 
   // Game Over / Mission Clear sound
   playGameOver() {
-    this.playBuffer('gameover', 0.75);
+    this.stopGameOver();
+    this.activeGameOver = this.playBuffer('gameover', 0.75);
   }
 }
 
