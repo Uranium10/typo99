@@ -920,24 +920,33 @@
 /* 3-2-1-GO Countdown Overlay */
 .countdown-overlay {
   position: absolute;
-  inset: 0;
+  top: 25%;
+  left: 0;
+  width: 100%;
+  height: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(5px);
+  background: #000000;
   z-index: 100;
+  border-top: 4px solid #ffffff;
+  border-bottom: 4px solid #ffffff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 .countdown-text {
   font-family: var(--font-en);
-  font-size: 14rem;
+  font-size: 15rem;
   font-weight: 900;
   font-style: italic;
-  color: #000;
-  text-shadow: 12px 12px 0px rgba(0, 0, 0, 0.15), 0 0 50px var(--accent-cyan);
+  color: #ffffff;
+  text-shadow: none;
   animation: countdown-slam 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   letter-spacing: -4px;
+}
+
+.countdown-text.go {
+  color: var(--accent-cyan);
 }
 
 @keyframes countdown-slam {

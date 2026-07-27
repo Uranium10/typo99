@@ -206,14 +206,6 @@ export default function GameScreen({ onGameOver, onQuit }) {
 
   return (
     <div className={`game-screen ${shake ? 'shake-active' : ''}`}>
-      {countdown !== null && (
-        <div className="countdown-overlay">
-          <span key={countdown} className="countdown-text">
-            {countdown}
-          </span>
-        </div>
-      )}
-
       {/* Hidden input to capture keyboard */}
       <input
         ref={inputRef}
@@ -240,6 +232,14 @@ export default function GameScreen({ onGameOver, onQuit }) {
 
       {/* Center Equation Area */}
       <div className="game-board" onClick={() => inputRef.current && inputRef.current.focus()}>
+        {countdown !== null && (
+          <div className="countdown-overlay">
+            <span key={countdown} className={`countdown-text ${countdown === 'GO!' ? 'go' : ''}`}>
+              {countdown}
+            </span>
+          </div>
+        )}
+
         {/* Feedback Text above equation */}
         <div className="feedback-banner">
           {feedback === 'correct' && <span className="feedback-text correct">정답!</span>}
