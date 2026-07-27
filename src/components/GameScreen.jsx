@@ -18,8 +18,6 @@ export default function GameScreen({ onGameOver, onQuit }) {
   
   // Timer state in ms
   const [elapsedMs, setElapsedMs] = useState(0);
-  const [penaltyMs, setPenaltyMs] = useState(0);
-  const [floatingPenalty, setFloatingPenalty] = useState(null);
   
   // Visual effects states
   const [shake, setShake] = useState(false);
@@ -46,20 +44,20 @@ export default function GameScreen({ onGameOver, onQuit }) {
     return () => window.removeEventListener('click', handleGlobalClick);
   }, []);
 
-  // Timer loop
+  // Timer loop (real elapsed time without artificial jump)
   useEffect(() => {
     startTimeRef.current = performance.now();
     const updateTimer = () => {
       if (!isTransitioningRef.current || feedback !== 'gameOver') {
         const now = performance.now();
-        const diff = Math.floor(now - startTimeRef.current) + penaltyMs;
+        const diff = Math.floor(now - startTimeRef.current);
         setElapsedMs(diff);
       }
       timerRef.current = requestAnimationFrame(updateTimer);
     };
     timerRef.current = requestAnimationFrame(updateTimer);
     return () => cancelAnimationFrame(timerRef.current);
-  }, [penaltyMs, feedback]);
+  }, [feedback]);
 
   const triggerShake = useCallback(() => {
     setShake(false);
@@ -71,7 +69,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
     isTransitioningRef.current = true;
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
     const newWrong = !isCorrect ? wrongCount + 1 : wrongCount;
-    const remaining = 20 - (newCorrect + newWrong);
+    const remaining = 20 - newCorrect;
 
     if (remaining <= 0) {
       setTimeout(() => {
@@ -80,14 +78,14 @@ export default function GameScreen({ onGameOver, onQuit }) {
           totalMs: elapsedMs,
           correct: newCorrect,
           wrong: newWrong,
-          penalties: newWrong * 1000,
+          penalties: newWrong * 1500,
         });
       }, 500);
       return;
     }
 
     if (isCorrect) {
-      // Immediate transition for correct answers (zero delay before next problem flies in!)
+      // Immediate transition for correct answers
       setAnimState('out');
       sound.playSwoosh();
       setTimeout(() => {
@@ -102,7 +100,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
         }, 120);
       }, 100);
     } else {
-      // Wrong answer: let shatter animation & penalty display for 450ms
+      // Wrong answer: show explosion longer (1.5s delay penalty!) while timer keeps ticking
       setTimeout(() => {
         setFeedback(null);
         setAnimState('out');
@@ -117,7 +115,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
             if (inputRef.current) inputRef.current.focus();
           }, 150);
         }, 150);
-      }, 450);
+      }, 1500);
     }
   }, [correctCount, wrongCount, elapsedMs, onGameOver]);
 
@@ -150,15 +148,12 @@ export default function GameScreen({ onGameOver, onQuit }) {
         setWrongCount((w) => w + 1);
         sound.playWrong();
         triggerShake();
-        setPenaltyMs((p) => p + 1000);
-        setFloatingPenalty('+1.000s');
-        setTimeout(() => setFloatingPenalty(null), 1000);
 
         const chars = `${problem.n1} x ${problem.n2} = ${inputVal}`.split('');
         const pieces = chars.map((ch, idx) => ({
           char: ch,
-          x: (Math.random() - 0.5) * 350,
-          y: (Math.random() - 0.5) * 350 - 50,
+          x: (Math.random() - 0.5) * 450,
+          y: (Math.random() - 0.5) * 450 - 50,
           rot: (Math.random() - 0.5) * 720,
         }));
         setShatterPieces(pieces);
@@ -178,7 +173,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
     return `${m}:${s}:${mili}`;
   };
 
-  const remainingCount = Math.max(0, 20 - (correctCount + wrongCount));
+  const remainingCount = Math.max(0, 20 - correctCount);
 
   return (
     <div className={`game-screen ${shake ? 'shake-active' : ''}`}>
@@ -262,7 +257,6 @@ export default function GameScreen({ onGameOver, onQuit }) {
       {/* Bottom Footer & Timer Area */}
       <div className="game-footer">
         <div className="timer-wrapper">
-          {floatingPenalty && <div className="floating-penalty">{floatingPenalty}</div>}
           <div className="timer-pill">{formatTime(elapsedMs)}</div>
         </div>
         <button
