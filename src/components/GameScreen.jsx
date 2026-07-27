@@ -86,24 +86,39 @@ export default function GameScreen({ onGameOver, onQuit }) {
       return;
     }
 
-    // After feedback burst/shatter, trigger motion blur transition
-    setTimeout(() => {
-      setFeedback(null);
+    if (isCorrect) {
+      // Immediate transition for correct answers (zero delay before next problem flies in!)
       setAnimState('out');
       sound.playSwoosh();
-      
       setTimeout(() => {
+        setFeedback(null);
         setProblem((prev) => generateProblem(prev));
         setInputVal('');
         setAnimState('in');
-        
         setTimeout(() => {
           setAnimState('idle');
           isTransitioningRef.current = false;
           if (inputRef.current) inputRef.current.focus();
-        }, 200);
-      }, 200);
-    }, isCorrect ? 400 : 500);
+        }, 120);
+      }, 100);
+    } else {
+      // Wrong answer: let shatter animation & penalty display for 450ms
+      setTimeout(() => {
+        setFeedback(null);
+        setAnimState('out');
+        sound.playSwoosh();
+        setTimeout(() => {
+          setProblem((prev) => generateProblem(prev));
+          setInputVal('');
+          setAnimState('in');
+          setTimeout(() => {
+            setAnimState('idle');
+            isTransitioningRef.current = false;
+            if (inputRef.current) inputRef.current.focus();
+          }, 150);
+        }, 150);
+      }, 450);
+    }
   }, [correctCount, wrongCount, elapsedMs, onGameOver]);
 
   const handleInputChange = (e) => {
@@ -119,41 +134,6 @@ export default function GameScreen({ onGameOver, onQuit }) {
     } else if (val.length < prevLen) {
       sound.playDelete();
       triggerShake();
-    }
-
-    const ansStr = String(problem.ans);
-    // When input length matches answer length or user typed enough digits
-    if (val.length >= ansStr.length) {
-      if (val === ansStr) {
-        // Correct answer!
-        setFeedback('correct');
-        setCorrectCount((c) => c + 1);
-        sound.playCorrect();
-        handleNextProblem(true);
-      } else {
-        // Wrong answer!
-        setFeedback('wrong');
-        setWrongCount((w) => w + 1);
-        sound.playWrong();
-        triggerShake();
-        
-        // Add penalty 1000ms
-        setPenaltyMs((p) => p + 1000);
-        setFloatingPenalty('+1.000s');
-        setTimeout(() => setFloatingPenalty(null), 1000);
-
-        // Generate shatter pieces for `9 x 9 = WRONG`
-        const chars = `${problem.n1} x ${problem.n2} = ${val}`.split('');
-        const pieces = chars.map((ch, idx) => ({
-          char: ch,
-          x: (Math.random() - 0.5) * 350,
-          y: (Math.random() - 0.5) * 350 - 50,
-          rot: (Math.random() - 0.5) * 720,
-        }));
-        setShatterPieces(pieces);
-
-        handleNextProblem(false);
-      }
     }
   };
 

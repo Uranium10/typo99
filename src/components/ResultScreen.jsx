@@ -33,8 +33,16 @@ export default function ResultScreen({ result, onOpenLeaderboard, onBackToMain }
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error('등록에 실패했습니다');
+        throw new Error(data.error || '등록에 실패했습니다');
+      }
+
+      if (data.inserted === false) {
+        setErrorMsg('아쉽게도 Top 20 기록에 미치지 못하여 DB에 저장되지 않았습니다!');
+        sound.playWrong();
+        return;
       }
 
       setSubmitted(true);

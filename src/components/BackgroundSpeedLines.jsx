@@ -25,12 +25,20 @@ export default function BackgroundSpeedLines({ speed = 'normal' }) {
     <div className="speed-lines-container">
       {lines.map((line, idx) => {
         const numDur = parseFloat(line.duration) * speedMultiplier;
+        let topVal = line.top;
+        if (speed === 'fast') {
+          const numTop = parseInt(line.top, 10);
+          if (numTop >= 28 && numTop <= 72) {
+            // Push above 25% or below 75% to keep the center equation zone completely clear
+            topVal = idx % 2 === 0 ? `${(idx * 4) % 20 + 4}%` : `${(idx * 4) % 20 + 76}%`;
+          }
+        }
         return (
           <div
             key={idx}
             className={`speed-line ${line.dir}`}
             style={{
-              top: line.top,
+              top: topVal,
               height: line.height,
               width: line.width,
               animationDuration: `${numDur}s`,
