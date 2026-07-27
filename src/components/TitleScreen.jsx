@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { sound } from '../sound';
 
 export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
   const [activeTab, setActiveTab] = useState('start'); // 'start' or 'leaderboard'
+  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const bubbleTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -35,13 +43,27 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
     }
   };
 
+  const handleLogoClick = () => {
+    sound.playType();
+    setShowSpeechBubble(true);
+    if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+    bubbleTimerRef.current = setTimeout(() => {
+      setShowSpeechBubble(false);
+    }, 2800);
+  };
+
   return (
     <div className="title-screen">
       <div className="title-logo-container">
+        {showSpeechBubble && (
+          <div className="speech-bubble">
+            타이포 99는 구구단 20문제를 빠르게 맞추는 게임이야!! ⚡
+          </div>
+        )}
         {/* Decorative background stripes for the logo */}
         <div className="logo-line logo-line-top-1" />
         <div className="logo-line logo-line-top-2" />
-        <div className="logo-box">
+        <div className="logo-box" onClick={handleLogoClick} title="클릭해보세요!">
           <h1 className="logo-text">타이포99</h1>
         </div>
         <div className="logo-line logo-line-bot-1" />
