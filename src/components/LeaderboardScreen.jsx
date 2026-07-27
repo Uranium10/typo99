@@ -129,7 +129,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
     if (submitted) {
       return scores.map((row) => {
         const isMy = (myScoreId && Number(row.id) === Number(myScoreId)) ||
-                     (!myScoreId && row.score === result.totalMs && row.player_names === (playerName.trim() || 'AAAA'));
+          (!myScoreId && row.score === result.totalMs && row.player_names === (playerName.trim() || 'AAAA'));
         return { ...row, isNewBadge: isMy, isPreview: false };
       });
     }
@@ -159,8 +159,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
   return (
     <div className="leaderboard-screen">
       <div className="leaderboard-header">
-        <h1 className="leaderboard-title">순위표 (LEADERBOARD)</h1>
-        <p className="leaderboard-subtitle">TYPO99 20문제 스피드런 명예의 전당</p>
+        <h1 className="leaderboard-title">LEADERBOARD</h1>
       </div>
 
       {!loading && !error && result && (
@@ -169,8 +168,8 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
             isTop20 ? (
               <>
                 <div className="registration-header">
-                  <span className="celebration-badge">🎉 명예의 전당 [ {estimatedRank}위 ] 달성! 🎉</span>
-                  <p className="registration-desc">기록: <strong>{formatTime(result.totalMs)}</strong> — 현재 <strong>{estimatedRank}위</strong>에 위치합니다! 닉네임을 등록하세요!</p>
+                  <span className="celebration-badge">🎉 랭킹 {estimatedRank}위 달성! 🎉</span>
+                  <p className="registration-desc">기록: <strong>{formatTime(result.totalMs)}</strong> — 닉네임을 등록하세요!</p>
                 </div>
                 <form className="register-form" onSubmit={handleSubmitScore}>
                   <div className="input-group">
@@ -200,12 +199,12 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
               </>
             ) : (
               <div className="registration-header">
-                <span className="not-qualified-badge">내 기록: {formatTime(result.totalMs)} (예상 순위: {estimatedRank}위 — 아쉽게도 Top 20 진입에 실패했습니다)</span>
+                <span className="not-qualified-badge">기록: {formatTime(result.totalMs)} (랭킹 {estimatedRank}위 — 아쉽게도 Top 20 진입 실패)</span>
               </div>
             )
           ) : (
             <div className="registration-header">
-              <span className="celebration-badge">✅ 명예의 전당 [ {myRank || estimatedRank}위 ]에 성공적으로 등록되었습니다!</span>
+              <span className="celebration-badge">✅ 랭킹 {myRank || estimatedRank}위 등록 완료!</span>
             </div>
           )}
         </div>
@@ -242,7 +241,6 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
                   <th className="th-rank">순위</th>
                   <th className="th-name">플레이어</th>
                   <th className="th-score">기록 (MS)</th>
-                  <th className="th-date">달성 일시</th>
                 </tr>
               </thead>
               <tbody>
@@ -254,14 +252,14 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
                     <tr key={row.id || idx} className={`rank-row ${isTop3 ? `top-${rank}` : ''} ${isMyRow ? 'my-rank-row' : ''}`}>
                       <td className="td-rank">
                         <span className="rank-badge">{rank}</span>
-                        {isMyRow && <span className="my-badge">ME</span>}
                       </td>
                       <td className="td-name">
-                        {row.player_names}
-                        {isMyRow && <span className="new-badge">신규!</span>}
+                        <span className="player-name-text">{row.player_names}</span>
+                        {isMyRow && <span className="new-badge">NEW!</span>}
                       </td>
-                      <td className="td-score">{formatTime(row.score)}</td>
-                      <td className="td-date">{row.isPreview ? '[ 등록 대기중 ]' : formatDate(row.created_at)}</td>
+                      <td className="td-score">
+                        {formatTime(row.score)}
+                      </td>
                     </tr>
                   );
                 })}
