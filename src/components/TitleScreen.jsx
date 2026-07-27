@@ -49,7 +49,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
     if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
     bubbleTimerRef.current = setTimeout(() => {
       setShowSpeechBubble(false);
-    }, 2800);
+    }, 3200);
   };
 
   return (
@@ -57,7 +57,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
       <div className="title-logo-container">
         {showSpeechBubble && (
           <div className="speech-bubble">
-            타이포 99는 구구단 20문제를 빠르게 맞추는 게임이야!! ⚡
+            극강의 구구단 스피드런! 20개의 문제를 밀리초(MS) 단위로 돌파하라. ⚡
           </div>
         )}
         {/* Decorative background stripes for the logo */}
