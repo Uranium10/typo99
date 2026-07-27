@@ -1,0 +1,42 @@
+import { createClient } from '@libsql/client';
+
+export default async function handler(req, res) {
+  const url = process.env.TURSO_DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+
+  if (!url || !authToken) {
+    return res.status(500).json({ error: 'Database configuration missing' });
+  }
+
+  const client = createClient({ url, authToken });
+
+  if (req.method === 'GET') {
+    try {
+      const result = await client.execute(
+        "SELECT id, player_names, score, created_at FROM typo99_scores ORDER BY score ASC, created_at ASC LIMIT 50"
+      );
+      return res.status(200).json({ scores: result.rows });
+    } catch (error) {
+      console.error('Error fetching scores:', error);
+      return res.status(500).json({ error: 'Failed to fetch scores' });
+    }
+  } else if (req.method === 'POST') {
+    try {
+      const { player_names, score } = req.body || {};
+      if (!player_names || typeof score !== 'number') {
+        return res.status(400).json({ error: 'Invalid input' });
+      }
+      await client.execute({
+        sql: "INSERT INTO typo99_scores (player_names, score) VALUES (?, ?)",
+        args: [String(player_names).trim().slice(0, 15), Math.round(score)]
+      });
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error('Error inserting score:', error);
+      return res.status(500).json({ error: 'Failed to insert score' });
+    }
+  } else {
+    res.setHeader('Allow', ['GET', 'POST']);
+    return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+  }
+}
