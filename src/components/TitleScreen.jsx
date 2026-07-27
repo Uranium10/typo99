@@ -109,7 +109,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
           }}
           onMouseEnter={() => handleSelectTab('hell')}
         >
-          <span className="menu-btn-text">🔥 지옥모드 🔥</span>
+          <span className="menu-btn-text">지옥모드</span>
           {activeTab === 'hell' && (
             <div className="menu-btn-decor hell-decor">
               <span className="decor-strip strip-1" />
