@@ -57,7 +57,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
       <div className="title-logo-container">
         {showSpeechBubble && (
           <div className="speech-bubble">
-            구구단 20문제를 가장 빠르게 푸는 스피드런 게임! ⚡
+            구구단 20문제를 빠르게 푸는 스피드런 게임! ⚡
           </div>
         )}
         {/* Decorative background stripes for the logo */}

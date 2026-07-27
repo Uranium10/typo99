@@ -40,17 +40,30 @@ export default async function handler(req, res) {
       }
 
       // 3. Insert new qualifying score
-      await client.execute({
+      const insertRes = await client.execute({
         sql: "INSERT INTO typo99_scores (player_names, score) VALUES (?, ?)",
         args: [String(player_names).trim().slice(0, 15), numScore]
       });
+      const insertedId = Number(insertRes.lastInsertRowid);
 
       // 4. Delete any records outside the Top 20
       await client.execute(
         "DELETE FROM typo99_scores WHERE id NOT IN (SELECT id FROM typo99_scores ORDER BY score ASC, created_at ASC LIMIT 20)"
       );
 
-      return res.status(200).json({ success: true, inserted: true });
+      // 5. Fetch updated top 20 to find exact rank
+      const newTop = await client.execute(
+        "SELECT id, score FROM typo99_scores ORDER BY score ASC, created_at ASC LIMIT 20"
+      );
+      let newRank = -1;
+      for (let i = 0; i < newTop.rows.length; i++) {
+        if (Number(newTop.rows[i].id) === insertedId) {
+          newRank = i + 1;
+          break;
+        }
+      }
+
+      return res.status(200).json({ success: true, inserted: true, insertedId, rank: newRank });
     } catch (error) {
       console.error('Error inserting score:', error);
       return res.status(500).json({ error: 'Failed to insert score' });

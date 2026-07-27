@@ -10,6 +10,8 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [myRank, setMyRank] = useState(null);
+  const [myScoreId, setMyScoreId] = useState(null);
 
   const loadScores = async (isMounted = true) => {
     setLoading(true);
@@ -55,9 +57,21 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
     }
   };
 
-  const isTop20 = !loading && result && (
-    scores.length < 20 || result.totalMs < scores[scores.length - 1].score
-  );
+  const getEstimatedRank = () => {
+    if (!result || loading) return 1;
+    let rank = 1;
+    for (let i = 0; i < scores.length; i++) {
+      if (result.totalMs >= scores[i].score) {
+        rank = i + 2;
+      } else {
+        break;
+      }
+    }
+    return rank;
+  };
+
+  const estimatedRank = getEstimatedRank();
+  const isTop20 = !loading && result && (scores.length < 20 || estimatedRank <= 20);
 
   const handleSubmitScore = async (e) => {
     e && e.preventDefault();
@@ -90,6 +104,8 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
         return;
       }
 
+      if (data.rank) setMyRank(data.rank);
+      if (data.insertedId) setMyScoreId(data.insertedId);
       setSubmitted(true);
       sound.playCorrect();
       await loadScores(true);
@@ -117,8 +133,8 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
             isTop20 ? (
               <>
                 <div className="registration-header">
-                  <span className="celebration-badge">🎉 TOP 20 명예의 전당 달성! 🎉</span>
-                  <p className="registration-desc">기록: <strong>{formatTime(result.totalMs)}</strong> — 닉네임을 입력하세요!</p>
+                  <span className="celebration-badge">🎉 명예의 전당 [ {estimatedRank}위 ] 달성! 🎉</span>
+                  <p className="registration-desc">기록: <strong>{formatTime(result.totalMs)}</strong> — 현재 <strong>{estimatedRank}위</strong>에 위치합니다! 닉네임을 등록하세요!</p>
                 </div>
                 <form className="register-form" onSubmit={handleSubmitScore}>
                   <div className="input-group">
@@ -148,12 +164,12 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
               </>
             ) : (
               <div className="registration-header">
-                <span className="not-qualified-badge">내 기록: {formatTime(result.totalMs)} (아쉽게도 Top 20 기록에 미치지 못했습니다)</span>
+                <span className="not-qualified-badge">내 기록: {formatTime(result.totalMs)} (예상 순위: {estimatedRank}위 — 아쉽게도 Top 20 진입에 실패했습니다)</span>
               </div>
             )
           ) : (
             <div className="registration-header">
-              <span className="celebration-badge">✅ 명예의 전당에 성공적으로 등록되었습니다!</span>
+              <span className="celebration-badge">✅ 명예의 전당 [ {myRank || estimatedRank}위 ]에 성공적으로 등록되었습니다!</span>
             </div>
           )}
         </div>
@@ -197,10 +213,15 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
                 {scores.map((row, idx) => {
                   const rank = idx + 1;
                   const isTop3 = rank <= 3;
+                  const isMyRow = submitted && (
+                    (myScoreId && Number(row.id) === Number(myScoreId)) ||
+                    (!myScoreId && row.score === result?.totalMs && row.player_names === (playerName.trim() || 'AAAA'))
+                  );
                   return (
-                    <tr key={row.id || idx} className={`rank-row ${isTop3 ? `top-${rank}` : ''}`}>
+                    <tr key={row.id || idx} className={`rank-row ${isTop3 ? `top-${rank}` : ''} ${isMyRow ? 'my-rank-row' : ''}`}>
                       <td className="td-rank">
                         <span className="rank-badge">{rank}</span>
+                        {isMyRow && <span className="my-badge">ME</span>}
                       </td>
                       <td className="td-name">{row.player_names}</td>
                       <td className="td-score">{formatTime(row.score)}</td>
