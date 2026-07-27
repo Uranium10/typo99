@@ -226,6 +226,93 @@
 .strip-1 { width: 8px; }
 .strip-2 { width: 4px; }
 
+/* =========================================================
+   HELL MODE STYLES
+   ========================================================= */
+.menu-btn.hell-btn.active {
+  background: #ff2a2a;
+  color: #fff;
+  border-color: #000;
+  box-shadow: 10px 10px 0px rgba(180, 0, 0, 0.4);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: pulse-hell-btn 0.6s infinite alternate;
+}
+
+@keyframes pulse-hell-btn {
+  from { transform: skewX(-15deg) scale(1.1) translateX(10px); }
+  to { transform: skewX(-15deg) scale(1.15) translateX(10px); }
+}
+
+.menu-btn.hell-btn.inactive {
+  background: #4a1515;
+  color: #ff9999;
+  border-color: #6a2020;
+}
+
+.menu-btn.hell-btn.inactive:hover {
+  background: #7a2020;
+  color: #fff;
+  border-color: #ff2a2a;
+}
+
+.menu-btn-decor.hell-decor .decor-strip {
+  background: #ff2a2a;
+  box-shadow: 0 0 8px rgba(255, 42, 42, 0.8);
+}
+
+/* Game Header in Hell Mode */
+.game-header.hell-header {
+  background: linear-gradient(90deg, #3a0007, #110002, #3a0007);
+  border-bottom: 4px solid #ff2a2a;
+  box-shadow: 0 4px 20px rgba(255, 42, 42, 0.5);
+}
+
+/* Timer in Hell Mode */
+.timer-pill.hell-timer {
+  background: #ff2a2a !important;
+  color: #fff !important;
+  border-color: #000 !important;
+  box-shadow: 0 0 20px rgba(255, 42, 42, 0.8) !important;
+  animation: pulse-hell-timer 0.5s infinite alternate;
+}
+
+@keyframes pulse-hell-timer {
+  from { transform: scale(1); box-shadow: 0 0 15px rgba(255, 42, 42, 0.6); }
+  to { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 60, 0, 1); }
+}
+
+/* Speed Lines in Hell Mode */
+.speed-lines-container.hell-lines .speed-line {
+  background: rgba(255, 42, 42, 0.55) !important;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.9) !important;
+}
+
+/* Result Screen in Hell Mode */
+.result-screen.hell-result .result-card {
+  border-color: #ff2a2a;
+  box-shadow: 12px 12px 0px rgba(180, 0, 0, 0.3);
+}
+
+.hell-badge-result {
+  background: linear-gradient(135deg, #ff2a2a, #990000);
+  color: #fff;
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  font-weight: 900;
+  padding: 0.6rem 1.2rem;
+  border: 3px solid #000;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  box-shadow: 4px 4px 0px #000;
+  text-align: center;
+  animation: bounce-badge 1s infinite alternate;
+}
+
+@keyframes bounce-badge {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
 .title-footer-hint {
   position: absolute;
   bottom: 2rem;
@@ -1156,6 +1243,19 @@
 }
 
 @media (max-width: 600px) {
+  /* Title Screen Menu */
+  .menu-container {
+    flex-direction: column;
+    gap: 1.2rem;
+    width: 100%;
+    max-width: 280px;
+  }
+  .menu-btn {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1.6rem;
+  }
+
   /* Game Screen */
   .game-header {
     padding: 0.6rem 0.6rem;

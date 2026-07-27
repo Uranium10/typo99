@@ -285,7 +285,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
             onStartGame();
           }}
         >
-          바로 게임 시작하기
+          {result?.mode === 'hell' ? '🔥 지옥모드 다시 하기 🔥' : '바로 게임 시작하기'}
         </button>
         <button
           className="back-btn"

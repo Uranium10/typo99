@@ -9,14 +9,17 @@ import LeaderboardScreen from './components/LeaderboardScreen';
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('title'); // 'title' | 'game' | 'result' | 'leaderboard'
   const [gameResult, setGameResult] = useState(null);
+  const [gameMode, setGameMode] = useState('normal'); // 'normal' | 'hell'
 
-  const handleStartGame = () => {
+  const handleStartGame = (mode = 'normal') => {
+    const targetMode = typeof mode === 'string' ? mode : (gameResult?.mode || gameMode || 'normal');
+    setGameMode(targetMode);
     setGameResult(null);
     setCurrentScreen('game');
   };
 
   const handleGameOver = (resultData) => {
-    setGameResult(resultData);
+    setGameResult({ ...resultData, mode: gameMode });
     setCurrentScreen('result');
   };
 
@@ -30,7 +33,7 @@ export default function App() {
   };
 
   return (
-    <div className={`app-container screen-${currentScreen}`}>
+    <div className={`app-container screen-${currentScreen} mode-${gameMode}`}>
       {/* Inline SVG filters for Motion Blur */}
       <svg className="svg-filters" width="0" height="0" style={{ position: 'absolute', pointerEvents: 'none' }}>
         <defs>
@@ -47,7 +50,10 @@ export default function App() {
       </svg>
 
       {/* Dynamic Background Speed Lines */}
-      <BackgroundSpeedLines speed={currentScreen === 'game' ? 'fast' : 'normal'} />
+      <BackgroundSpeedLines
+        speed={currentScreen === 'game' ? 'fast' : 'normal'}
+        mode={currentScreen === 'game' ? gameMode : 'normal'}
+      />
 
       {/* Main Content Area */}
       <main className="main-viewport">
@@ -60,6 +66,7 @@ export default function App() {
 
         {currentScreen === 'game' && (
           <GameScreen
+            mode={gameMode}
             onGameOver={handleGameOver}
             onQuit={handleBackToMain}
           />
@@ -76,7 +83,7 @@ export default function App() {
           <LeaderboardScreen
             result={gameResult}
             onScoreSubmitted={() => setGameResult(null)}
-            onStartGame={handleStartGame}
+            onStartGame={() => handleStartGame(gameResult?.mode || gameMode || 'normal')}
             onBackToMain={handleBackToMain}
           />
         )}

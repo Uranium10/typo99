@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function BackgroundSpeedLines({ speed = 'normal' }) {
+export default function BackgroundSpeedLines({ speed = 'normal', mode = 'normal' }) {
   // Generate a set of static horizontal lines with different heights, widths, and animation durations
   const lines = [
     { top: '5%', height: '4px', width: '250px', duration: '6s', delay: '0s', dir: 'left-to-right' },
@@ -22,7 +22,7 @@ export default function BackgroundSpeedLines({ speed = 'normal' }) {
   const speedMultiplier = speed === 'fast' ? 0.4 : speed === 'hyper' ? 0.2 : 1;
 
   return (
-    <div className="speed-lines-container">
+    <div className={`speed-lines-container ${mode === 'hell' ? 'hell-lines' : ''}`}>
       {lines.map((line, idx) => {
         const numDur = parseFloat(line.duration) * speedMultiplier;
         let topVal = line.top;

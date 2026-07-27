@@ -1,17 +1,41 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { sound } from '../sound';
 
-function generateProblem(prevProblem) {
-  let n1, n2;
+function generateProblem(prevProblem, mode = 'normal') {
+  let n1, n2, op, ans;
   do {
-    n1 = Math.floor(Math.random() * 8) + 2; // 2 ~ 9
-    n2 = Math.floor(Math.random() * 8) + 2; // 2 ~ 9
-  } while (prevProblem && prevProblem.n1 === n1 && prevProblem.n2 === n2);
-  return { n1, n2, ans: n1 * n2 };
+    if (mode === 'hell') {
+      const type = ['mul19', 'add', 'sub'][Math.floor(Math.random() * 3)];
+      if (type === 'mul19') {
+        n1 = Math.floor(Math.random() * 18) + 2; // 2 ~ 19
+        n2 = Math.floor(Math.random() * 8) + 2; // 2 ~ 9
+        op = 'x';
+        ans = n1 * n2;
+      } else if (type === 'add') {
+        n1 = Math.floor(Math.random() * 90) + 10; // 10 ~ 99
+        n2 = Math.floor(Math.random() * 90) + 10; // 10 ~ 99
+        op = '+';
+        ans = n1 + n2;
+      } else {
+        let a = Math.floor(Math.random() * 90) + 10;
+        let b = Math.floor(Math.random() * 90) + 10;
+        n1 = Math.max(a, b);
+        n2 = Math.min(a, b);
+        op = '-';
+        ans = n1 - n2;
+      }
+    } else {
+      n1 = Math.floor(Math.random() * 8) + 2; // 2 ~ 9
+      n2 = Math.floor(Math.random() * 8) + 2; // 2 ~ 9
+      op = 'x';
+      ans = n1 * n2;
+    }
+  } while (prevProblem && prevProblem.n1 === n1 && prevProblem.n2 === n2 && prevProblem.op === op);
+  return { n1, n2, op, ans };
 }
 
-export default function GameScreen({ onGameOver, onQuit }) {
-  const [problem, setProblem] = useState(() => generateProblem(null));
+export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
+  const [problem, setProblem] = useState(() => generateProblem(null, mode));
   const [inputVal, setInputVal] = useState('');
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
@@ -48,48 +72,38 @@ export default function GameScreen({ onGameOver, onQuit }) {
   // 3-2-1-GO! Countdown effect before starting game
   useEffect(() => {
     sound.playCountdown();
-    const t1 = setTimeout(() => {
-      setCountdown(2);
-      sound.playCountdown();
+    let count = 3;
+    const interval = setInterval(() => {
+      count -= 1;
+      if (count > 0) {
+        sound.playCountdown();
+        setCountdown(count);
+      } else if (count === 0) {
+        sound.playBuffer('go', 0.65);
+        setCountdown('GO!');
+      } else {
+        clearInterval(interval);
+        setCountdown(null);
+      }
     }, 1000);
-    const t2 = setTimeout(() => {
-      setCountdown(1);
-      sound.playCountdown();
-    }, 2000);
-    const t3 = setTimeout(() => {
-      setCountdown('GO!');
-      sound.playGo();
-    }, 3000);
-    const t4 = setTimeout(() => {
-      startTimeRef.current = performance.now();
-      setCountdown(null);
-      if (inputRef.current) inputRef.current.focus();
-    }, 3600);
-    return () => {
-      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
-    };
+
+    return () => clearInterval(interval);
   }, []);
 
-  // Timer loop (real elapsed time without artificial jump, waits for countdown)
+  // Start game timer as soon as countdown reaches null
   useEffect(() => {
-    if (countdown !== null) {
-      setElapsedMs(0);
-      return;
-    }
-    if (!startTimeRef.current) {
+    if (countdown === null) {
       startTimeRef.current = performance.now();
-    }
-    const updateTimer = () => {
-      if (!isTransitioningRef.current || feedback !== 'gameOver') {
-        const now = performance.now();
-        const diff = Math.floor(now - startTimeRef.current);
-        setElapsedMs(diff);
-      }
+      const updateTimer = () => {
+        setElapsedMs(performance.now() - startTimeRef.current);
+        timerRef.current = requestAnimationFrame(updateTimer);
+      };
       timerRef.current = requestAnimationFrame(updateTimer);
+    }
+    return () => {
+      if (timerRef.current) cancelAnimationFrame(timerRef.current);
     };
-    timerRef.current = requestAnimationFrame(updateTimer);
-    return () => cancelAnimationFrame(timerRef.current);
-  }, [countdown, feedback]);
+  }, [countdown]);
 
   const triggerShake = useCallback(() => {
     setShake(false);
@@ -111,6 +125,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
           correct: newCorrect,
           wrong: newWrong,
           penalties: newWrong * 800,
+          mode: mode || 'normal',
         });
       }, 500);
       return;
@@ -122,7 +137,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
       sound.playSwoosh();
       setTimeout(() => {
         setFeedback(null);
-        setProblem((prev) => generateProblem(prev));
+        setProblem((prev) => generateProblem(prev, mode));
         setInputVal('');
         setAnimState('in');
         setTimeout(() => {
@@ -134,7 +149,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
     } else {
       // Wrong answer: show explosion for 0.8s (800ms) delay penalty while timer keeps ticking
       setTimeout(() => {
-        setProblem((prev) => generateProblem(prev));
+        setProblem((prev) => generateProblem(prev, mode));
         setInputVal('');
         setFeedback(null);
         setAnimState('in');
@@ -185,7 +200,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
         sound.playWrong();
         triggerShake();
 
-        const chars = `${problem.n1} x ${problem.n2} = ${inputVal}`.split('');
+        const chars = `${problem.n1} ${problem.op || 'x'} ${problem.n2} = ${inputVal}`.split('');
         const pieces = chars.map((ch) => ({
           char: ch,
           x: (Math.random() - 0.5) * 450,
@@ -234,7 +249,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
       />
 
       {/* Top Header Bar */}
-      <div className="game-header">
+      <div className={`game-header ${mode === 'hell' ? 'hell-header' : ''}`}>
         <div className="header-stat correct-stat">
           맞춘 개수 : <span className="highlight-cyan">{correctCount}</span>
         </div>
@@ -279,7 +294,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
         {feedback !== 'wrong' ? (
           <div className={`equation-container ${animState}`}>
             <span className="number-text">{problem.n1}</span>
-            <span className="operator-text">x</span>
+            <span className="operator-text">{problem.op || 'x'}</span>
             <span className="number-text">{problem.n2}</span>
             <span className="equals-text">=</span>
             <span className="input-text">
@@ -310,7 +325,10 @@ export default function GameScreen({ onGameOver, onQuit }) {
       {/* Bottom Footer & Timer Area */}
       <div className="game-footer">
         <div className="timer-wrapper">
-          <div className="timer-pill">{formatTime(elapsedMs)}</div>
+          <div className={`timer-pill ${mode === 'hell' ? 'hell-timer' : ''}`}>
+            {mode === 'hell' && <span className="hell-icon">🔥 </span>}
+            {formatTime(elapsedMs)}
+          </div>
         </div>
         <button
           className="quit-btn"

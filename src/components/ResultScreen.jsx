@@ -15,12 +15,17 @@ export default function ResultScreen({ result, onOpenLeaderboard }) {
   };
 
   return (
-    <div className="result-screen">
+    <div className={`result-screen ${result?.mode === 'hell' ? 'hell-result' : ''}`}>
       <div className="result-header">
-        <h1 className="result-title">MISSION CLEAR!</h1>
+        <h1 className="result-title">
+          {result?.mode === 'hell' ? '🔥 HELL CLEAR! 🔥' : 'MISSION CLEAR!'}
+        </h1>
       </div>
 
       <div className="result-card">
+        {result?.mode === 'hell' && (
+          <div className="hell-badge-result">👹 지옥모드 (2자릿수 연산 + 19단) 돌파! 👹</div>
+        )}
         <div className="time-display">
           <span className="time-label">최종 기록</span>
           <span className="time-value">{formatTime(result.totalMs)}</span>

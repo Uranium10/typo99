@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { sound } from '../sound';
 
 export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
-  const [activeTab, setActiveTab] = useState('start'); // 'start' or 'leaderboard'
+  const [activeTab, setActiveTab] = useState('start'); // 'start' | 'hell' | 'leaderboard'
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const bubbleTimerRef = useRef(null);
+  const tabs = ['start', 'hell', 'leaderboard'];
 
   useEffect(() => {
     return () => {
@@ -14,10 +15,17 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Tab') {
+      if (e.key === 'ArrowRight' || e.key === 'Tab') {
         e.preventDefault();
         setActiveTab((prev) => {
-          const next = prev === 'start' ? 'leaderboard' : 'start';
+          const next = tabs[(tabs.indexOf(prev) + 1) % tabs.length];
+          sound.playSwoosh();
+          return next;
+        });
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setActiveTab((prev) => {
+          const next = tabs[(tabs.indexOf(prev) - 1 + tabs.length) % tabs.length];
           sound.playSwoosh();
           return next;
         });
@@ -25,7 +33,10 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
         e.preventDefault();
         if (activeTab === 'start') {
           sound.playStart();
-          onStartGame();
+          onStartGame('normal');
+        } else if (activeTab === 'hell') {
+          sound.playStart();
+          onStartGame('hell');
         } else {
           sound.playType();
           onOpenLeaderboard();
@@ -76,13 +87,31 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
           onClick={() => {
             handleSelectTab('start');
             sound.playStart();
-            onStartGame();
+            onStartGame('normal');
           }}
           onMouseEnter={() => handleSelectTab('start')}
         >
           <span className="menu-btn-text">시작하기</span>
           {activeTab === 'start' && (
             <div className="menu-btn-decor">
+              <span className="decor-strip strip-1" />
+              <span className="decor-strip strip-2" />
+            </div>
+          )}
+        </button>
+
+        <button
+          className={`menu-btn hell-btn ${activeTab === 'hell' ? 'active' : 'inactive'}`}
+          onClick={() => {
+            handleSelectTab('hell');
+            sound.playStart();
+            onStartGame('hell');
+          }}
+          onMouseEnter={() => handleSelectTab('hell')}
+        >
+          <span className="menu-btn-text">🔥 지옥모드 🔥</span>
+          {activeTab === 'hell' && (
+            <div className="menu-btn-decor hell-decor">
               <span className="decor-strip strip-1" />
               <span className="decor-strip strip-2" />
             </div>
@@ -109,7 +138,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
       </div>
 
       <div className="title-footer-hint">
-        <span>◀ ▶ 키보드 화살표로 선택하고 ENTER로 시작하세요</span>
+        <span>◀ ▶ 화살표 또는 TAB으로 모드를 선택하고 ENTER로 시작하세요</span>
       </div>
     </div>
   );
