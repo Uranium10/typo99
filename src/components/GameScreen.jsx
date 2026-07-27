@@ -155,6 +155,13 @@ export default function GameScreen({ onGameOver, onQuit }) {
     const prevLen = inputVal.length;
     setInputVal(val);
 
+    // Keep cursor at the end on mobile browsers to prevent reverse typing from IME selection reset
+    setTimeout(() => {
+      if (inputRef.current && inputRef.current.setSelectionRange) {
+        inputRef.current.setSelectionRange(val.length, val.length);
+      }
+    }, 0);
+
     if (val.length > prevLen) {
       sound.playKeyInput();
       triggerShake();
@@ -179,7 +186,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
         triggerShake();
 
         const chars = `${problem.n1} x ${problem.n2} = ${inputVal}`.split('');
-        const pieces = chars.map((ch, idx) => ({
+        const pieces = chars.map((ch) => ({
           char: ch,
           x: (Math.random() - 0.5) * 450,
           y: (Math.random() - 0.5) * 450 - 50,
@@ -205,11 +212,20 @@ export default function GameScreen({ onGameOver, onQuit }) {
   const remainingCount = Math.max(0, 20 - correctCount);
 
   return (
-    <div className={`game-screen ${shake ? 'shake-active' : ''}`}>
-      {/* Hidden input to capture keyboard */}
+    <div
+      className={`game-screen ${shake ? 'shake-active' : ''}`}
+      onClick={() => inputRef.current && inputRef.current.focus()}
+    >
+      {/* Hidden input to capture keyboard and trigger numeric keypad on mobile */}
       <input
         ref={inputRef}
-        type="text"
+        type="tel"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck="false"
         className="hidden-input"
         value={inputVal}
         onChange={handleInputChange}

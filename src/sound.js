@@ -119,7 +119,6 @@ class SoundEngine {
 
   // UI Button click
   playType() {
-    this.stopGameOver();
     this.playBuffer('click', 0.4);
   }
 
