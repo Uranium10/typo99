@@ -134,18 +134,15 @@ export default function GameScreen({ onGameOver, onQuit }) {
     } else {
       // Wrong answer: show explosion for 0.8s (800ms) delay penalty while timer keeps ticking
       setTimeout(() => {
+        setProblem((prev) => generateProblem(prev));
+        setInputVal('');
         setFeedback(null);
-        setAnimState('out');
+        setAnimState('in');
         sound.playSwoosh();
         setTimeout(() => {
-          setProblem((prev) => generateProblem(prev));
-          setInputVal('');
-          setAnimState('in');
-          setTimeout(() => {
-            setAnimState('idle');
-            isTransitioningRef.current = false;
-            if (inputRef.current) inputRef.current.focus();
-          }, 150);
+          setAnimState('idle');
+          isTransitioningRef.current = false;
+          if (inputRef.current) inputRef.current.focus();
         }, 150);
       }, 800);
     }
