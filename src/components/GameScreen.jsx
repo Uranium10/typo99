@@ -18,6 +18,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
   
   // Timer state in ms
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [countdown, setCountdown] = useState(3); // 3, 2, 1, 'GO!', null
   
   // Visual effects states
   const [shake, setShake] = useState(false);
@@ -44,9 +45,40 @@ export default function GameScreen({ onGameOver, onQuit }) {
     return () => window.removeEventListener('click', handleGlobalClick);
   }, []);
 
-  // Timer loop (real elapsed time without artificial jump)
+  // 3-2-1-GO! Countdown effect before starting game
   useEffect(() => {
-    startTimeRef.current = performance.now();
+    sound.playType();
+    const t1 = setTimeout(() => {
+      setCountdown(2);
+      sound.playType();
+    }, 1000);
+    const t2 = setTimeout(() => {
+      setCountdown(1);
+      sound.playType();
+    }, 2000);
+    const t3 = setTimeout(() => {
+      setCountdown('GO!');
+      sound.playCorrect();
+    }, 3000);
+    const t4 = setTimeout(() => {
+      startTimeRef.current = performance.now();
+      setCountdown(null);
+      if (inputRef.current) inputRef.current.focus();
+    }, 3600);
+    return () => {
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4);
+    };
+  }, []);
+
+  // Timer loop (real elapsed time without artificial jump, waits for countdown)
+  useEffect(() => {
+    if (countdown !== null) {
+      setElapsedMs(0);
+      return;
+    }
+    if (!startTimeRef.current) {
+      startTimeRef.current = performance.now();
+    }
     const updateTimer = () => {
       if (!isTransitioningRef.current || feedback !== 'gameOver') {
         const now = performance.now();
@@ -57,7 +89,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
     };
     timerRef.current = requestAnimationFrame(updateTimer);
     return () => cancelAnimationFrame(timerRef.current);
-  }, [feedback]);
+  }, [countdown, feedback]);
 
   const triggerShake = useCallback(() => {
     setShake(false);
@@ -78,7 +110,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
           totalMs: elapsedMs,
           correct: newCorrect,
           wrong: newWrong,
-          penalties: newWrong * 1500,
+          penalties: newWrong * 800,
         });
       }, 500);
       return;
@@ -100,7 +132,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
         }, 120);
       }, 100);
     } else {
-      // Wrong answer: show explosion longer (1.5s delay penalty!) while timer keeps ticking
+      // Wrong answer: show explosion for 0.8s (800ms) delay penalty while timer keeps ticking
       setTimeout(() => {
         setFeedback(null);
         setAnimState('out');
@@ -115,12 +147,12 @@ export default function GameScreen({ onGameOver, onQuit }) {
             if (inputRef.current) inputRef.current.focus();
           }, 150);
         }, 150);
-      }, 1500);
+      }, 800);
     }
   }, [correctCount, wrongCount, elapsedMs, onGameOver]);
 
   const handleInputChange = (e) => {
-    if (isTransitioningRef.current || feedback) return;
+    if (isTransitioningRef.current || feedback || countdown !== null) return;
     
     const val = e.target.value.replace(/[^0-9]/g, '');
     const prevLen = inputVal.length;
@@ -136,7 +168,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
   };
 
   const handleKeyDown = (e) => {
-    if (isTransitioningRef.current || feedback) return;
+    if (isTransitioningRef.current || feedback || countdown !== null) return;
     if (e.key === 'Enter' && inputVal.length > 0) {
       if (inputVal === String(problem.ans)) {
         setFeedback('correct');
@@ -177,6 +209,14 @@ export default function GameScreen({ onGameOver, onQuit }) {
 
   return (
     <div className={`game-screen ${shake ? 'shake-active' : ''}`}>
+      {countdown !== null && (
+        <div className="countdown-overlay">
+          <span key={countdown} className="countdown-text">
+            {countdown}
+          </span>
+        </div>
+      )}
+
       {/* Hidden input to capture keyboard */}
       <input
         ref={inputRef}

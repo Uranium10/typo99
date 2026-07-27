@@ -451,7 +451,7 @@
 
 .shatter-piece {
   display: inline-block;
-  animation: piece-shatter 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: piece-shatter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   text-shadow: 0 0 25px rgba(255, 0, 51, 0.7);
 }
 
@@ -915,6 +915,36 @@
 .back-btn:hover {
   background: #eee;
   transform: translateY(-2px);
+}
+
+/* 3-2-1-GO Countdown Overlay */
+.countdown-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+}
+
+.countdown-text {
+  font-family: var(--font-en);
+  font-size: 14rem;
+  font-weight: 900;
+  font-style: italic;
+  color: #000;
+  text-shadow: 12px 12px 0px rgba(0, 0, 0, 0.15), 0 0 50px var(--accent-cyan);
+  animation: countdown-slam 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  letter-spacing: -4px;
+}
+
+@keyframes countdown-slam {
+  0% { transform: scale(3) rotate(-15deg); opacity: 0; }
+  30% { transform: scale(1) rotate(0deg); opacity: 1; }
+  80% { transform: scale(1.05) rotate(0deg); opacity: 1; }
+  100% { transform: scale(0.8) rotate(10deg); opacity: 0; }
 }
 
 /* =========================================================
