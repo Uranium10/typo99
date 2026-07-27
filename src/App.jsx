@@ -25,6 +25,7 @@ export default function App() {
   };
 
   const handleBackToMain = () => {
+    setGameResult(null);
     setCurrentScreen('title');
   };
 
@@ -68,12 +69,13 @@ export default function App() {
           <ResultScreen
             result={gameResult}
             onOpenLeaderboard={handleOpenLeaderboard}
-            onBackToMain={handleBackToMain}
           />
         )}
 
         {currentScreen === 'leaderboard' && (
           <LeaderboardScreen
+            result={gameResult}
+            onScoreSubmitted={() => setGameResult(null)}
             onStartGame={handleStartGame}
             onBackToMain={handleBackToMain}
           />

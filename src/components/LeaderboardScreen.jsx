@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { sound } from '../sound';
 
-export default function LeaderboardScreen({ onBackToMain, onStartGame }) {
+export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMain, onStartGame }) {
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [playerName, setPlayerName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  const loadScores = async (isMounted = true) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/scores');
+      if (!res.ok) throw new Error('순위표를 불러오는데 실패했습니다');
+      const data = await res.json();
+      if (isMounted) {
+        setScores(data.scores || []);
+      }
+    } catch (err) {
+      if (isMounted) {
+        console.error(err);
+        setError('순위표 데이터를 불러올 수 없습니다.');
+      }
+    } finally {
+      if (isMounted) setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
-    const fetchScores = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch('/api/scores');
-        if (!res.ok) throw new Error('순위표를 불러오는데 실패했습니다');
-        const data = await res.json();
-        if (isMounted) {
-          setScores(data.scores || []);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error(err);
-          setError('순위표 데이터를 불러올 수 없습니다.');
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchScores();
+    loadScores(isMounted);
     return () => { isMounted = false; };
   }, []);
 
@@ -50,12 +55,109 @@ export default function LeaderboardScreen({ onBackToMain, onStartGame }) {
     }
   };
 
+  const isTop20 = !loading && result && (
+    scores.length < 20 || result.totalMs < scores[scores.length - 1].score
+  );
+
+  const handleSubmitScore = async (e) => {
+    e && e.preventDefault();
+    if (isSubmitting || submitted) return;
+
+    const finalName = playerName.trim() || 'AAAA';
+    sound.playType();
+    setIsSubmitting(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await fetch('/api/scores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player_names: finalName.slice(0, 15),
+          score: result.totalMs,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || '등록에 실패했습니다');
+      }
+
+      if (data.inserted === false) {
+        setErrorMsg('아쉽게도 Top 20 기록에 미치지 못하여 DB에 저장되지 않았습니다!');
+        sound.playWrong();
+        return;
+      }
+
+      setSubmitted(true);
+      sound.playCorrect();
+      await loadScores(true);
+      if (onScoreSubmitted) {
+        onScoreSubmitted();
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('순위 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="leaderboard-screen">
       <div className="leaderboard-header">
         <h1 className="leaderboard-title">순위표 (LEADERBOARD)</h1>
         <p className="leaderboard-subtitle">TYPO99 20문제 스피드런 명예의 전당</p>
       </div>
+
+      {!loading && !error && result && (
+        <div className="registration-card">
+          {!submitted ? (
+            isTop20 ? (
+              <>
+                <div className="registration-header">
+                  <span className="celebration-badge">🎉 TOP 20 명예의 전당 달성! 🎉</span>
+                  <p className="registration-desc">기록: <strong>{formatTime(result.totalMs)}</strong> — 닉네임을 입력하세요!</p>
+                </div>
+                <form className="register-form" onSubmit={handleSubmitScore}>
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="name-input"
+                      placeholder="AAAA"
+                      value={playerName}
+                      maxLength={15}
+                      onChange={(e) => {
+                        setPlayerName(e.target.value);
+                        sound.playType();
+                      }}
+                      disabled={isSubmitting || submitted}
+                      autoFocus
+                    />
+                    <button
+                      type="submit"
+                      className="submit-btn"
+                      disabled={isSubmitting || submitted}
+                    >
+                      {isSubmitting ? '등록 중...' : '순위표에 등록'}
+                    </button>
+                  </div>
+                  {errorMsg && <p className="error-text">{errorMsg}</p>}
+                </form>
+              </>
+            ) : (
+              <div className="registration-header">
+                <span className="not-qualified-badge">내 기록: {formatTime(result.totalMs)} (아쉽게도 Top 20 기록에 미치지 못했습니다)</span>
+              </div>
+            )
+          ) : (
+            <div className="registration-header">
+              <span className="celebration-badge">✅ 명예의 전당에 성공적으로 등록되었습니다!</span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="leaderboard-container">
         {loading && (
