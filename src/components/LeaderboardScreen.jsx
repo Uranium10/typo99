@@ -175,6 +175,9 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
                   <div className="input-group">
                     <input
                       type="text"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      spellCheck="false"
                       className="name-input"
                       placeholder="AAAA"
                       value={playerName}

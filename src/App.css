@@ -1156,6 +1156,7 @@
 }
 
 @media (max-width: 600px) {
+  /* Game Screen */
   .game-header {
     padding: 0.6rem 0.6rem;
     font-size: 0.95rem;
@@ -1185,18 +1186,119 @@
   .logo-text {
     font-size: 2.5rem;
   }
+
+  /* Result Screen */
+  .result-screen {
+    padding: 1rem;
+  }
   .result-title {
+    font-size: 2.5rem;
+  }
+  .result-card {
+    padding: 1.5rem 1rem;
+    gap: 1.2rem;
+    border: 4px solid #000;
+    box-shadow: 8px 8px 0px #000;
+  }
+  .time-value {
     font-size: 2.2rem;
   }
-  .th-rank, .td-rank {
-    width: 35px;
+  .stats-grid {
+    gap: 0.3rem;
   }
-  .th-time, .td-time {
-    width: 80px;
+  .stat-num {
+    font-size: 1.6rem;
   }
-  .rank-table th, .rank-table td {
-    padding: 0.6rem 0.3rem;
+  .stat-desc {
+    font-size: 0.8rem;
+  }
+  .next-btn {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1.2rem;
+  }
+
+  /* Leaderboard & Registration Screen */
+  .leaderboard-screen {
+    padding: 0.8rem;
+  }
+  .leaderboard-title {
+    font-size: 2rem;
+  }
+  .registration-card {
+    padding: 1rem 0.8rem;
+    width: 100%;
+    border: 3px solid #000;
+    box-shadow: 4px 4px 0px #000;
+    gap: 0.8rem;
+  }
+  .registration-header {
+    gap: 0.4rem;
+  }
+  .celebration-badge, .not-qualified-badge {
     font-size: 0.95rem;
+    padding: 0.4rem 0.8rem;
+    text-align: center;
+  }
+  .registration-desc {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .input-group {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .name-input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 1.1rem;
+  }
+  .leaderboard-container {
+    border: 3px solid #000;
+    box-shadow: 6px 6px 0px #000;
+  }
+  .leaderboard-table th, .leaderboard-table td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.9rem;
+  }
+  .th-rank, .td-rank {
+    width: 45px;
+  }
+  .th-score, .td-score {
+    width: 110px;
+    font-size: 0.9rem;
+  }
+  .td-name {
+    font-size: 0.95rem;
+  }
+  .rank-badge {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+  .new-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.4rem;
+  }
+  .leaderboard-footer {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 0;
+  }
+  .main-action-btn, .back-btn {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1.2rem;
+    white-space: nowrap;
+    border: 3px solid #000;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
   }
 }
 
@@ -1222,5 +1324,32 @@
   .timer-pill {
     font-size: 1.3rem;
     padding: 0.3rem 1.2rem;
+  }
+  .result-title {
+    font-size: 2rem;
+  }
+  .time-value {
+    font-size: 1.8rem;
+  }
+  .stat-num {
+    font-size: 1.3rem;
+  }
+  .leaderboard-title {
+    font-size: 1.7rem;
+  }
+  .leaderboard-table th, .leaderboard-table td {
+    padding: 0.5rem 0.2rem;
+    font-size: 0.82rem;
+  }
+  .th-rank, .td-rank {
+    width: 35px;
+  }
+  .th-score, .td-score {
+    width: 95px;
+    font-size: 0.82rem;
+  }
+  .main-action-btn, .back-btn {
+    font-size: 1.1rem;
+    padding: 0.7rem 0.5rem;
   }
 }
