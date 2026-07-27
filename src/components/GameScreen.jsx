@@ -156,7 +156,7 @@ export default function GameScreen({ onGameOver, onQuit }) {
     setInputVal(val);
 
     if (val.length > prevLen) {
-      sound.playType();
+      sound.playKeyInput();
       triggerShake();
     } else if (val.length < prevLen) {
       sound.playDelete();

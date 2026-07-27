@@ -1,6 +1,8 @@
 // Web Audio Engine with Splice High-Quality Audio Samples for TYPO99
 import clickUrl from './assets/sounds/wv_button_click_general.mp3';
 import hoverUrl from './assets/sounds/wv_button_hovermp3.mp3';
+import eraseUrl from './assets/sounds/wv_key_erase.mp3';
+import inputUrl from './assets/sounds/wv_key_input.mp3';
 import countdownUrl from './assets/sounds/wv_pregame_countdown.mp3';
 import goUrl from './assets/sounds/wv_pregame_go!.mp3';
 import rightUrl from './assets/sounds/wv_right_answer.mp3';
@@ -14,6 +16,8 @@ class SoundEngine {
     this.urls = {
       click: clickUrl,
       hover: hoverUrl,
+      erase: eraseUrl,
+      input: inputUrl,
       countdown: countdownUrl,
       go: goUrl,
       right: rightUrl,
@@ -78,14 +82,19 @@ class SoundEngine {
     }
   }
 
-  // Mechanical typing click
-  playType() {
-    this.playBuffer('click', 0.4);
+  // Keyboard typing / digit input
+  playKeyInput() {
+    this.playBuffer('input', 0.45);
   }
 
-  // Slight delete sound
+  // Backspace / Erase key
   playDelete() {
-    this.playBuffer('hover', 0.4, 0.85);
+    this.playBuffer('erase', 0.5);
+  }
+
+  // UI Button click
+  playType() {
+    this.playBuffer('click', 0.4);
   }
 
   // Menu hover swoosh

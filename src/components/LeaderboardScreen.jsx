@@ -180,8 +180,13 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
                       value={playerName}
                       maxLength={15}
                       onChange={(e) => {
-                        setPlayerName(e.target.value);
-                        sound.playType();
+                        const val = e.target.value;
+                        if (val.length < playerName.length) {
+                          sound.playDelete();
+                        } else {
+                          sound.playKeyInput();
+                        }
+                        setPlayerName(val);
                       }}
                       disabled={isSubmitting || submitted}
                       autoFocus
