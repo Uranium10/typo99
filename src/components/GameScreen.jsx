@@ -47,18 +47,18 @@ export default function GameScreen({ onGameOver, onQuit }) {
 
   // 3-2-1-GO! Countdown effect before starting game
   useEffect(() => {
-    sound.playType();
+    sound.playCountdown();
     const t1 = setTimeout(() => {
       setCountdown(2);
-      sound.playType();
+      sound.playCountdown();
     }, 1000);
     const t2 = setTimeout(() => {
       setCountdown(1);
-      sound.playType();
+      sound.playCountdown();
     }, 2000);
     const t3 = setTimeout(() => {
       setCountdown('GO!');
-      sound.playCorrect();
+      sound.playGo();
     }, 3000);
     const t4 = setTimeout(() => {
       startTimeRef.current = performance.now();

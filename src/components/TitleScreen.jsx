@@ -24,7 +24,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         if (activeTab === 'start') {
-          sound.playType();
+          sound.playStart();
           onStartGame();
         } else {
           sound.playType();
@@ -75,7 +75,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
           className={`menu-btn ${activeTab === 'start' ? 'active' : 'inactive'}`}
           onClick={() => {
             handleSelectTab('start');
-            sound.playType();
+            sound.playStart();
             onStartGame();
           }}
           onMouseEnter={() => handleSelectTab('start')}

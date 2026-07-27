@@ -1,7 +1,26 @@
-// Web Audio API synthesized sound effects for TYPO99
+// Web Audio Engine with Splice High-Quality Audio Samples for TYPO99
+import clickUrl from './assets/sounds/wv_button_click_general.mp3';
+import hoverUrl from './assets/sounds/wv_button_hovermp3.mp3';
+import countdownUrl from './assets/sounds/wv_pregame_countdown.mp3';
+import goUrl from './assets/sounds/wv_pregame_go!.mp3';
+import rightUrl from './assets/sounds/wv_right_answer.mp3';
+import startUrl from './assets/sounds/wv_start_but.mp3';
+import wrongUrl from './assets/sounds/wv_wrong_answer.mp3';
+
 class SoundEngine {
   constructor() {
     this.ctx = null;
+    this.buffers = {};
+    this.urls = {
+      click: clickUrl,
+      hover: hoverUrl,
+      countdown: countdownUrl,
+      go: goUrl,
+      right: rightUrl,
+      start: startUrl,
+      wrong: wrongUrl,
+    };
+    this.loadingPromise = null;
   }
 
   init() {
@@ -9,6 +28,7 @@ class SoundEngine {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
+        this.preload();
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -16,149 +36,86 @@ class SoundEngine {
     }
   }
 
-  // Crisp mechanical typing click
-  playType() {
-    this.init();
-    if (!this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(120, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.04);
-      
-      gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
-      
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.04);
-    } catch (e) {
-      // ignore audio errors
-    }
+  async preload() {
+    if (!this.ctx || this.loadingPromise) return;
+    this.loadingPromise = (async () => {
+      for (const [key, url] of Object.entries(this.urls)) {
+        try {
+          const res = await fetch(url);
+          const arrayBuf = await res.arrayBuffer();
+          this.buffers[key] = await this.ctx.decodeAudioData(arrayBuf);
+        } catch (e) {
+          console.warn('Failed to decode audio buffer:', key, e);
+        }
+      }
+    })();
   }
 
-  // Slight delete click
-  playDelete() {
+  playBuffer(key, volume = 0.5, rate = 1.0) {
     this.init();
-    if (!this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(200, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.05);
-      
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
-      
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.05);
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  // Correct answer chime (cyan star & ring burst)
-  playCorrect() {
-    this.init();
-    if (!this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-        const osc = this.ctx.createOscillator();
+    const buf = this.buffers[key];
+    if (this.ctx && buf) {
+      try {
+        const source = this.ctx.createBufferSource();
+        source.buffer = buf;
+        source.playbackRate.value = rate;
+        
         const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+        gain.gain.value = volume;
         
-        gain.gain.setValueAtTime(0, now + idx * 0.05);
-        gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.05 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.25);
-        
-        osc.connect(gain);
+        source.connect(gain);
         gain.connect(this.ctx.destination);
-        osc.start(now + idx * 0.05);
-        osc.stop(now + idx * 0.05 + 0.25);
-      });
-    } catch (e) {
-      // ignore
+        source.start(0);
+      } catch (e) {}
+    } else {
+      // Fallback if AudioContext buffer is loading or suspended
+      try {
+        const audio = new Audio(this.urls[key]);
+        audio.volume = volume;
+        audio.playbackRate = rate;
+        audio.play().catch(() => {});
+      } catch (e) {}
     }
+  }
+
+  // Mechanical typing click
+  playType() {
+    this.playBuffer('click', 0.4);
+  }
+
+  // Slight delete sound
+  playDelete() {
+    this.playBuffer('hover', 0.4, 0.85);
+  }
+
+  // Menu hover swoosh
+  playSwoosh() {
+    this.playBuffer('hover', 0.3);
+  }
+
+  // Correct answer chime
+  playCorrect() {
+    this.playBuffer('right', 0.55);
   }
 
   // Wrong answer shatter sound
   playWrong() {
-    this.init();
-    if (!this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      // White noise buffer for shatter / glass breaking sound
-      const bufferSize = this.ctx.sampleRate * 0.25;
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const output = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-      }
-      
-      const whiteNoise = this.ctx.createBufferSource();
-      whiteNoise.buffer = buffer;
-      
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(800, now);
-      filter.frequency.exponentialRampToValueAtTime(200, now + 0.25);
-      
-      const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.5, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-      
-      whiteNoise.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
-      whiteNoise.start(now);
-      whiteNoise.stop(now + 0.25);
-
-      // Low buzzer
-      const osc = this.ctx.createOscillator();
-      const oscGain = this.ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(110, now);
-      osc.frequency.linearRampToValueAtTime(55, now + 0.2);
-      oscGain.gain.setValueAtTime(0.4, now);
-      oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-      osc.connect(oscGain);
-      oscGain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.2);
-    } catch (e) {
-      // ignore
-    }
+    this.playBuffer('wrong', 0.6);
   }
 
-  // Menu switch / hover swoosh
-  playSwoosh() {
-    this.init();
-    if (!this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
-      
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-      
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.08);
-    } catch (e) {
-      // ignore
-    }
+  // Countdown beep (3, 2, 1)
+  playCountdown() {
+    this.playBuffer('countdown', 0.65);
+  }
+
+  // GO! start signal
+  playGo() {
+    this.playBuffer('go', 0.7);
+  }
+
+  // Game start button click / Clear sound
+  playStart() {
+    this.playBuffer('start', 0.65);
   }
 }
 

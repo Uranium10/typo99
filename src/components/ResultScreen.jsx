@@ -2,6 +2,10 @@ import React from 'react';
 import { sound } from '../sound';
 
 export default function ResultScreen({ result, onOpenLeaderboard }) {
+  React.useEffect(() => {
+    sound.playStart();
+  }, []);
+
   const formatTime = (ms) => {
     const totalSec = Math.floor(ms / 1000);
     const m = String(Math.floor(totalSec / 60)).padStart(2, '0');

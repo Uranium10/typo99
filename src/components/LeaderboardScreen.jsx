@@ -273,7 +273,7 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
         <button
           className="main-action-btn"
           onClick={() => {
-            sound.playType();
+            sound.playStart();
             onStartGame();
           }}
         >
