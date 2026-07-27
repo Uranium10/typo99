@@ -49,7 +49,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
     if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
     bubbleTimerRef.current = setTimeout(() => {
       setShowSpeechBubble(false);
-    }, 3200);
+    }, 3000);
   };
 
   return (
@@ -57,7 +57,7 @@ export default function TitleScreen({ onStartGame, onOpenLeaderboard }) {
       <div className="title-logo-container">
         {showSpeechBubble && (
           <div className="speech-bubble">
-            극강의 구구단 스피드런! 20개의 문제를 밀리초(MS) 단위로 돌파하라. ⚡
+            구구단 20문제를 가장 빠르게 푸는 스피드런 게임! ⚡
           </div>
         )}
         {/* Decorative background stripes for the logo */}
