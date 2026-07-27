@@ -9,7 +9,8 @@
   --gray-mid: #ced4da;
   --gray-dark: #212529;
   
-  --font-kr: 'Black Han Sans', 'Outfit', sans-serif;
+  --font-title: 'Black Han Sans', 'Outfit', sans-serif;
+  --font-kr: 'Pretendard', 'Noto Sans KR', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-en: 'Montserrat', 'Outfit', sans-serif;
   --font-mono: 'Roboto Mono', monospace;
 }

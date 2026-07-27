@@ -21,7 +21,7 @@ export default function LeaderboardScreen({ onBackToMain, onStartGame }) {
       } catch (err) {
         if (isMounted) {
           console.error(err);
-          setError('순위표 데이터를 불러올 수 없습니다. (DB 연결 설정을 확인해주세요)');
+          setError('순위표 데이터를 불러올 수 없습니다.');
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -61,7 +61,7 @@ export default function LeaderboardScreen({ onBackToMain, onStartGame }) {
         {loading && (
           <div className="loading-state">
             <div className="spinner" />
-            <p>TURSO DB에서 순위 데이터를 불러오는 중...</p>
+            <p>순위 데이터를 불러오는 중...</p>
           </div>
         )}
 
