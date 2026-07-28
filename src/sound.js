@@ -122,6 +122,10 @@ class SoundEngine {
     this.playBuffer('click', 0.4);
   }
 
+  playBtnClick() {
+    this.playType();
+  }
+
   // Menu hover swoosh
   playSwoosh() {
     this.playBuffer('hover', 0.3);

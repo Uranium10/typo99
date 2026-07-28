@@ -175,14 +175,14 @@ export default function LeaderboardScreen({ result, onScoreSubmitted, onBackToMa
           <button
             type="button"
             className={`lb-tab-btn ${leaderboardMode === 'normal' ? 'active' : ''}`}
-            onClick={() => { sound.playBtnClick(); setLeaderboardMode('normal'); }}
+            onClick={() => { sound.playType(); setLeaderboardMode('normal'); }}
           >
             일반 모드
           </button>
           <button
             type="button"
             className={`lb-tab-btn ${leaderboardMode === 'hell' ? 'active hell-active' : ''}`}
-            onClick={() => { sound.playBtnClick(); setLeaderboardMode('hell'); }}
+            onClick={() => { sound.playType(); setLeaderboardMode('hell'); }}
           >
             지옥모드
           </button>
