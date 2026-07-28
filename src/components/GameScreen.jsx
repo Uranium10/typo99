@@ -41,26 +41,24 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 600);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
+
   // Timer state in ms
   const [elapsedMs, setElapsedMs] = useState(0);
   const [countdown, setCountdown] = useState(3); // 3, 2, 1, 'GO!', null
-  
+
   // Visual effects states
   const [shake, setShake] = useState(false);
   const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
-  const [banner, setBanner] = useState(null); // { type: 'correct' | 'wrong', id: number } | null
-  const bannerTimeoutRef = useRef(null);
   const [animState, setAnimState] = useState('idle'); // 'idle' | 'out' | 'in'
   const [shatterPieces, setShatterPieces] = useState([]);
-  
+
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
   const inputRef = useRef(null);
@@ -113,7 +111,6 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     }
     return () => {
       if (timerRef.current) cancelAnimationFrame(timerRef.current);
-      if (bannerTimeoutRef.current) clearTimeout(bannerTimeoutRef.current);
     };
   }, [countdown]);
 
@@ -158,7 +155,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
   const handleInputChange = (e) => {
     if (isTransitioningRef.current || feedback || countdown !== null) return;
-    
+
     const val = e.target.value.replace(/[^0-9]/g, '');
     const prevLen = inputVal.length;
     setInputVal(val);
@@ -177,6 +174,18 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
       sound.playDelete();
       triggerShake();
     }
+
+    const ansStr = String(problem.ans);
+    if (val.length >= ansStr.length) {
+      if (val === ansStr) {
+        setFeedback('correct');
+        setCorrectCount((c) => c + 1);
+        sound.playCorrect();
+        triggerShake();
+        setAnimState('out');
+        handleNextProblem(true);
+      }
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -184,20 +193,13 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     if (e.key === 'Enter' && inputVal.length > 0) {
       if (inputVal === String(problem.ans)) {
         setFeedback('correct');
-        setBanner({ type: 'correct', id: Date.now() });
-        if (bannerTimeoutRef.current) clearTimeout(bannerTimeoutRef.current);
-        bannerTimeoutRef.current = setTimeout(() => setBanner(null), 500);
-
         setCorrectCount((c) => c + 1);
         sound.playCorrect();
+        triggerShake();
         setAnimState('out');
         handleNextProblem(true);
       } else {
         setFeedback('wrong');
-        setBanner({ type: 'wrong', id: Date.now() });
-        if (bannerTimeoutRef.current) clearTimeout(bannerTimeoutRef.current);
-        bannerTimeoutRef.current = setTimeout(() => setBanner(null), 800);
-
         setWrongCount((w) => w + 1);
         sound.playWrong();
         triggerShake();
@@ -313,13 +315,13 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
         {/* Feedback Text above equation */}
         <div className="feedback-banner">
-          {banner?.type === 'correct' && <span key={`correct-${banner.id}`} className="feedback-text correct">정답!</span>}
-          {banner?.type === 'wrong' && <span key={`wrong-${banner.id}`} className="feedback-text wrong">오답!</span>}
+          {feedback === 'correct' && <span className="feedback-text correct">정답!</span>}
+          {feedback === 'wrong' && <span className="feedback-text wrong">오답!</span>}
         </div>
 
         {/* Correct feedback: Donut Ring & Stars (behind letters) */}
-        {banner?.type === 'correct' && (
-          <div key={`burst-${banner.id}`} className="correct-burst-container">
+        {feedback === 'correct' && (
+          <div className="correct-burst-container">
             <div className="donut-ring" />
             <div className="star star-1">★</div>
             <div className="star star-2">★</div>
@@ -388,7 +390,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
       {/* Custom Keypad for Mobile */}
       {isMobile && (
-        <CustomKeypad 
+        <CustomKeypad
           onInput={handleKeypadInput}
           onEnter={() => handleKeyDown({ key: 'Enter' })}
           onDelete={handleKeypadDelete}
