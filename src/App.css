@@ -1311,6 +1311,10 @@
   }
 
   /* Game Screen */
+  .game-board {
+    justify-content: flex-start;
+    padding-top: 20vh;
+  }
   .game-header {
     padding: 0.6rem 0.6rem;
     font-size: 0.95rem;
