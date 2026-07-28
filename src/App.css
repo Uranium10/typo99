@@ -1554,9 +1554,9 @@
 }
 
 .keypad-btn {
-  background: var(--bg-main);
-  color: var(--text-main);
-  border: 3px solid #000;
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
   border-radius: 8px;
   font-family: var(--font-en);
   font-size: 2rem;
@@ -1567,30 +1567,33 @@
   touch-action: manipulation;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.05s, background 0.05s, color 0.05s, box-shadow 0.05s;
-  box-shadow: 4px 4px 0px #000;
+  transition: background 0.05s, color 0.05s;
 }
 
 .keypad-btn:active {
-  background: #000;
-  color: #fff;
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #000;
+  background: #fff;
+  color: #000;
 }
 
 .keypad-btn.action {
   font-size: 1.5rem;
   font-weight: 800;
+  background: #111;
+}
+
+.keypad-btn.action:active {
+  background: #fff;
+  color: #000;
 }
 
 .keypad-btn.enter {
-  grid-row: span 4;
-  background: #000;
+  grid-row: span 3;
+  background: #111;
   color: var(--accent-cyan);
-  border-color: #000;
+  border-color: #333;
 }
 
 .keypad-btn.enter:active {
-  background: #333;
-  color: #fff;
+  background: #fff;
+  color: #000;
 }
