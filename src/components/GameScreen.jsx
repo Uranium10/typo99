@@ -319,8 +319,13 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
             sound.playType();
             onQuit();
           }}
+          title="그만하기"
         >
-          그만하기
+          <span className="quit-text">그만하기</span>
+          <svg className="quit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
         </button>
       </div>
     </div>

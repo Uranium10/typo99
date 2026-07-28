@@ -676,6 +676,10 @@
   transform: scale(1.05);
 }
 
+.quit-icon {
+  display: none;
+}
+
 /* =========================================================
    RESULT SCREEN
    ========================================================= */
@@ -1311,6 +1315,26 @@
   }
 
   /* Game Screen */
+  .quit-btn {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    padding: 0.6rem;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .quit-text {
+    display: none;
+  }
+  .quit-icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
   .game-header {
     padding: 0.6rem 0.6rem;
     font-size: 0.95rem;
