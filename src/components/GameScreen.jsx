@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { sound } from '../sound';
+import CustomKeypad from './CustomKeypad';
 
 function generateProblem(prevProblem, mode = 'normal') {
   let n1, n2, op, ans;
@@ -39,6 +40,14 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
   const [inputVal, setInputVal] = useState('');
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 600);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Timer state in ms
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -198,6 +207,42 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     }
   };
 
+  const handleKeypadInput = (val) => {
+    if (isTransitioningRef.current || feedback || countdown !== null) return;
+    setInputVal((prev) => {
+      const newVal = (prev + val).replace(/[^0-9]/g, '');
+      if (newVal.length > prev.length) {
+        sound.playKeyInput();
+        triggerShake();
+      }
+      return newVal;
+    });
+  };
+
+  const handleKeypadDelete = () => {
+    if (isTransitioningRef.current || feedback || countdown !== null) return;
+    setInputVal((prev) => {
+      if (prev.length > 0) {
+        sound.playDelete();
+        triggerShake();
+        return prev.slice(0, -1);
+      }
+      return prev;
+    });
+  };
+
+  const handleKeypadClear = () => {
+    if (isTransitioningRef.current || feedback || countdown !== null) return;
+    setInputVal((prev) => {
+      if (prev.length > 0) {
+        sound.playDelete();
+        triggerShake();
+        return '';
+      }
+      return prev;
+    });
+  };
+
   const formatTime = (ms) => {
     const cleanMs = Math.floor(Number(ms) || 0);
     const totalSec = Math.floor(cleanMs / 1000);
@@ -218,7 +263,8 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
       <input
         ref={inputRef}
         type="tel"
-        inputMode="numeric"
+        inputMode={isMobile ? "none" : "numeric"}
+        readOnly={isMobile}
         pattern="[0-9]*"
         autoComplete="off"
         autoCorrect="off"
@@ -228,7 +274,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         value={inputVal}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        autoFocus
+        autoFocus={!isMobile}
       />
 
       {/* Top Header Bar */}
@@ -328,6 +374,16 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
           </svg>
         </button>
       </div>
+
+      {/* Custom Keypad for Mobile */}
+      {isMobile && (
+        <CustomKeypad 
+          onInput={handleKeypadInput}
+          onEnter={() => handleKeyDown({ key: 'Enter' })}
+          onDelete={handleKeypadDelete}
+          onClear={handleKeypadClear}
+        />
+      )}
     </div>
   );
 }
