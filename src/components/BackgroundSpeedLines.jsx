@@ -31,10 +31,10 @@ export default function BackgroundSpeedLines({ speed = 'normal', mode = 'normal'
           const isMobile = window.innerWidth <= 600;
           
           if (isMobile) {
-            // On mobile, the equation is higher up due to the custom keypad at the bottom.
-            // Clear the top area (approx 5% to 55%) where the equation sits.
-            if (numTop >= 5 && numTop <= 55) {
-              topVal = idx % 2 === 0 ? `${(idx * 2) % 10 + 60}%` : `${(idx * 2) % 10 + 80}%`;
+            // On mobile, the equation is roughly centered in the top half (around 25-35%).
+            // Clear only the exact area where the equation sits (18% to 45%) so lines can fly above and below it.
+            if (numTop >= 18 && numTop <= 45) {
+              topVal = idx % 2 === 0 ? `${(idx * 3) % 15 + 2}%` : `${(idx * 3) % 12 + 48}%`;
             }
           } else {
             // On desktop, clear the center area (28% to 72%)

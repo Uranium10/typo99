@@ -8,9 +8,9 @@ export default function CustomKeypad({ onInput, onEnter, onDelete, onClear }) {
     }
     e.stopPropagation();
 
-    // Trigger slight haptic if available on mobile
+    // Trigger slight haptic if available on mobile (decreased duration for a lighter touch)
     if (window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(10);
+      window.navigator.vibrate(3);
     }
 
     if (action === 'input') {
