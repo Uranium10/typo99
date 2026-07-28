@@ -149,7 +149,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
           isTransitioningRef.current = false;
           if (inputRef.current) inputRef.current.focus({ preventScroll: true });
         }, 150);
-      }, isCorrect ? 100 : 800);
+      }, isCorrect ? 500 : 800);
     }
   }, [correctCount, wrongCount, elapsedMs, mode, onGameOver]);
 

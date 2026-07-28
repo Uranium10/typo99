@@ -527,23 +527,21 @@
 }
 
 .equation-container.out {
-  animation: slide-out-blur 0.22s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
-  filter: url(#motion-blur-x);
+  animation: stable-out 0.2s ease forwards;
 }
 
 .equation-container.in {
-  animation: slide-in-blur 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  filter: url(#motion-blur-x);
+  animation: stable-in 0.2s ease forwards;
 }
 
-@keyframes slide-out-blur {
-  0% { transform: translateX(0) skewX(-10deg); opacity: 1; }
-  100% { transform: translateX(-50vw) skewX(-35deg); opacity: 0; }
+@keyframes stable-out {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0; }
 }
 
-@keyframes slide-in-blur {
-  0% { transform: translateX(50vw) skewX(-35deg); opacity: 0; }
-  100% { transform: translateX(0) skewX(-10deg); opacity: 1; }
+@keyframes stable-in {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .number-text, .operator-text, .equals-text, .input-text {
