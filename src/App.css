@@ -522,12 +522,13 @@
   font-weight: 900;
   font-style: italic;
   color: #000;
+  position: relative;
   z-index: 10;
   transition: filter 0.15s, transform 0.15s;
 }
 
 .equation-container.out {
-  animation: slide-out-blur 0.22s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+  animation: slide-out-blur 0.1s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
   filter: url(#motion-blur-x);
 }
 
@@ -538,7 +539,7 @@
 
 @keyframes slide-out-blur {
   0% { transform: translateX(0) skewX(-10deg); opacity: 1; }
-  100% { transform: translateX(-50vw) skewX(-35deg); opacity: 0; }
+  100% { transform: translateX(-100vw) skewX(-45deg); opacity: 0; }
 }
 
 @keyframes slide-in-blur {
