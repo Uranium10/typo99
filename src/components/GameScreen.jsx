@@ -55,6 +55,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
   // Visual effects states
   const [shake, setShake] = useState(false);
+  const [impactShake, setImpactShake] = useState(false);
   const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
   const [correctTextKey, setCorrectTextKey] = useState(0); // 0 = hidden, >0 = showing (timestamp)
   const correctTextTimeoutRef = useRef(null);
@@ -121,6 +122,12 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     setShake(false);
     setTimeout(() => setShake(true), 10);
     setTimeout(() => setShake(false), 150);
+  }, []);
+
+  const triggerImpactShake = useCallback(() => {
+    setImpactShake(false);
+    setTimeout(() => setImpactShake(true), 10);
+    setTimeout(() => setImpactShake(false), 200);
   }, []);
 
   const handleNextProblem = useCallback((isCorrect) => {
@@ -190,6 +197,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
         setCorrectCount((c) => c + 1);
         sound.playCorrect();
+        triggerImpactShake();
         setAnimState('out');
         handleNextProblem(true);
       } else {
@@ -301,7 +309,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
       </div>
 
       {/* Center Equation Area */}
-      <div className="game-board" onClick={() => inputRef.current && inputRef.current.focus({ preventScroll: true })}>
+      <div className={`game-board ${impactShake ? 'impact-shake' : ''}`} onClick={() => inputRef.current && inputRef.current.focus({ preventScroll: true })}>
         {countdown !== null && (
           <div className="countdown-overlay">
             <span key={countdown} className={`countdown-text ${countdown === 'GO!' ? 'go' : ''}`}>
@@ -319,6 +327,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         {/* Correct feedback: Donut Ring & Stars (behind letters) */}
         {correctTextKey > 0 && (
           <div key={`burst-${correctTextKey}`} className="correct-burst-container">
+            <div className="correct-flash" />
             <div className="donut-ring" />
             <div className="star star-1">★</div>
             <div className="star star-2">★</div>
