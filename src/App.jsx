@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import BackgroundSpeedLines from './components/BackgroundSpeedLines';
 import TitleScreen from './components/TitleScreen';
@@ -10,6 +10,15 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState('title'); // 'title' | 'game' | 'result' | 'leaderboard'
   const [gameResult, setGameResult] = useState(null);
   const [gameMode, setGameMode] = useState('normal'); // 'normal' | 'hell'
+  const [viewportHeight, setViewportHeight] = useState('100%');
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+    const handleResize = () => setViewportHeight(`${window.visualViewport.height}px`);
+    window.visualViewport.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.visualViewport.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleStartGame = (mode = 'normal') => {
     const targetMode = typeof mode === 'string' ? mode : (gameResult?.mode || gameMode || 'normal');
@@ -33,7 +42,10 @@ export default function App() {
   };
 
   return (
-    <div className={`app-container screen-${currentScreen} mode-${gameMode}`}>
+    <div 
+      className={`app-container screen-${currentScreen} mode-${gameMode}`}
+      style={{ height: viewportHeight }}
+    >
       {/* Inline SVG filters for Motion Blur */}
       <svg className="svg-filters" width="0" height="0" style={{ position: 'absolute', pointerEvents: 'none' }}>
         <defs>

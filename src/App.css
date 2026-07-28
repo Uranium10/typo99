@@ -1311,12 +1311,6 @@
   }
 
   /* Game Screen */
-  .game-board {
-    flex: none;
-    height: 40vh;
-    margin-top: 2vh;
-    margin-bottom: auto;
-  }
   .game-header {
     padding: 0.6rem 0.6rem;
     font-size: 0.95rem;
