@@ -177,22 +177,6 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
       sound.playDelete();
       triggerShake();
     }
-
-    const ansStr = String(problem.ans);
-    if (val.length >= ansStr.length) {
-      if (val === ansStr) {
-        setFeedback('correct');
-        setCorrectTextKey(Date.now());
-        if (correctTextTimeoutRef.current) clearTimeout(correctTextTimeoutRef.current);
-        correctTextTimeoutRef.current = setTimeout(() => setCorrectTextKey(0), 800);
-
-        setCorrectCount((c) => c + 1);
-        sound.playCorrect();
-        triggerShake();
-        setAnimState('out');
-        handleNextProblem(true);
-      }
-    }
   };
 
   const handleKeyDown = (e) => {
@@ -210,6 +194,9 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         handleNextProblem(true);
       } else {
         setFeedback('wrong');
+        setCorrectTextKey(0); // Clear any lingering 'Correct' text immediately
+        if (correctTextTimeoutRef.current) clearTimeout(correctTextTimeoutRef.current);
+        
         setWrongCount((w) => w + 1);
         sound.playWrong();
         triggerShake();
