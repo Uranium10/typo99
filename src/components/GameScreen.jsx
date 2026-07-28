@@ -214,7 +214,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         sound.playWrong();
         triggerShake();
 
-        const chars = `${problem.n1} ${problem.op || 'x'} ${problem.n2} = ${val}`.split('');
+        const chars = `${problem.n1} ${problem.op || 'x'} ${problem.n2} = ${inputVal}`.split('');
         const pieces = chars.map((ch) => ({
           char: ch,
           x: (Math.random() - 0.5) * 450,
