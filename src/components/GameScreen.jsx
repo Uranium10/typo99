@@ -317,8 +317,8 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         </div>
 
         {/* Correct feedback: Donut Ring & Stars (behind letters) */}
-        {feedback === 'correct' && (
-          <div className="correct-burst-container">
+        {correctTextKey > 0 && (
+          <div key={`burst-${correctTextKey}`} className="correct-burst-container">
             <div className="donut-ring" />
             <div className="star star-1">★</div>
             <div className="star star-2">★</div>
