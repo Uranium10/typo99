@@ -120,6 +120,15 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     setTimeout(() => setShake(false), 150);
   }, []);
 
+  const triggerHeavyShake = useCallback(() => {
+    setShake(false);
+    setTimeout(() => setShake('heavy'), 10);
+    setTimeout(() => setShake(false), 300);
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate([40, 30, 40]); // pattern vibration for correct answer
+    }
+  }, []);
+
   const handleNextProblem = useCallback((isCorrect) => {
     isTransitioningRef.current = true;
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
@@ -181,7 +190,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         setFeedback('correct');
         setCorrectCount((c) => c + 1);
         sound.playCorrect();
-        triggerShake();
+        triggerHeavyShake();
         setAnimState('out');
         handleNextProblem(true);
       }
@@ -195,7 +204,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         setFeedback('correct');
         setCorrectCount((c) => c + 1);
         sound.playCorrect();
-        triggerShake();
+        triggerHeavyShake();
         setAnimState('out');
         handleNextProblem(true);
       } else {
@@ -269,7 +278,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
   return (
     <div
-      className={`game-screen ${shake ? 'shake-active' : ''}`}
+      className={`game-screen ${shake === 'heavy' ? 'shake-heavy' : shake ? 'shake-active' : ''}`}
       onClick={() => inputRef.current && inputRef.current.focus({ preventScroll: true })}
     >
       {/* Hidden input to capture keyboard and trigger numeric keypad on mobile */}
