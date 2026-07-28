@@ -58,11 +58,11 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
   // Focus hidden input for mobile/desktop typing
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus({ preventScroll: true });
     }
     const handleGlobalClick = () => {
       if (inputRef.current && isTransitioningRef.current === false) {
-        inputRef.current.focus();
+        inputRef.current.focus({ preventScroll: true });
       }
     };
     window.addEventListener('click', handleGlobalClick);
@@ -138,7 +138,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         setTimeout(() => {
           setAnimState('idle');
           isTransitioningRef.current = false;
-          if (inputRef.current) inputRef.current.focus();
+          if (inputRef.current) inputRef.current.focus({ preventScroll: true });
         }, 150);
       }, isCorrect ? 100 : 800);
     }
@@ -212,7 +212,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
   return (
     <div
       className={`game-screen ${shake ? 'shake-active' : ''}`}
-      onClick={() => inputRef.current && inputRef.current.focus()}
+      onClick={() => inputRef.current && inputRef.current.focus({ preventScroll: true })}
     >
       {/* Hidden input to capture keyboard and trigger numeric keypad on mobile */}
       <input
@@ -245,7 +245,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
       </div>
 
       {/* Center Equation Area */}
-      <div className="game-board" onClick={() => inputRef.current && inputRef.current.focus()}>
+      <div className="game-board" onClick={() => inputRef.current && inputRef.current.focus({ preventScroll: true })}>
         {countdown !== null && (
           <div className="countdown-overlay">
             <span key={countdown} className={`countdown-text ${countdown === 'GO!' ? 'go' : ''}`}>
