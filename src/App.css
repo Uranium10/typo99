@@ -1547,7 +1547,9 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr) 1.2fr;
   grid-auto-rows: 65px;
-  gap: 0.5rem;
+  gap: 1px;
+  background: #fff;
+  border: 1px solid #fff;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
@@ -1556,8 +1558,8 @@
 .keypad-btn {
   background: #000;
   color: #fff;
-  border: 1px solid #333;
-  border-radius: 8px;
+  border: none;
+  border-radius: 0;
   font-family: var(--font-en);
   font-size: 2rem;
   font-weight: 900;

@@ -28,9 +28,19 @@ export default function BackgroundSpeedLines({ speed = 'normal', mode = 'normal'
         let topVal = line.top;
         if (speed === 'fast') {
           const numTop = parseInt(line.top, 10);
-          if (numTop >= 28 && numTop <= 72) {
-            // Push above 25% or below 75% to keep the center equation zone completely clear
-            topVal = idx % 2 === 0 ? `${(idx * 4) % 20 + 4}%` : `${(idx * 4) % 20 + 76}%`;
+          const isMobile = window.innerWidth <= 600;
+          
+          if (isMobile) {
+            // On mobile, the equation is higher up due to the custom keypad at the bottom.
+            // Clear the top area (approx 5% to 55%) where the equation sits.
+            if (numTop >= 5 && numTop <= 55) {
+              topVal = idx % 2 === 0 ? `${(idx * 2) % 10 + 60}%` : `${(idx * 2) % 10 + 80}%`;
+            }
+          } else {
+            // On desktop, clear the center area (28% to 72%)
+            if (numTop >= 28 && numTop <= 72) {
+              topVal = idx % 2 === 0 ? `${(idx * 4) % 20 + 4}%` : `${(idx * 4) % 20 + 76}%`;
+            }
           }
         }
         return (

@@ -65,9 +65,8 @@ export default function CustomKeypad({ onInput, onEnter, onDelete, onClear }) {
         <button className="keypad-btn num" {...createProps('input', '9')}>9</button>
 
         {/* Row 4 */}
+        <button className="keypad-btn num" style={{ gridColumn: 'span 2' }} {...createProps('input', '0')}>0</button>
         <button className="keypad-btn action clear" {...createProps('clear')}>C</button>
-        <button className="keypad-btn num" {...createProps('input', '0')}>0</button>
-        <div className="keypad-btn empty" style={{ visibility: 'hidden', pointerEvents: 'none' }}></div>
       </div>
     </div>
   );
