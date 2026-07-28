@@ -50,10 +50,10 @@ export default function App() {
       <svg className="svg-filters" width="0" height="0" style={{ position: 'absolute', pointerEvents: 'none' }}>
         <defs>
           <filter id="motion-blur-x" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="35, 0" />
+            <feGaussianBlur stdDeviation="15, 0" />
           </filter>
           <filter id="motion-blur-y" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="0, 35" />
+            <feGaussianBlur stdDeviation="0, 15" />
           </filter>
           <filter id="motion-blur-diagonal" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="25, 12" />

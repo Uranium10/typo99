@@ -56,6 +56,8 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
   // Visual effects states
   const [shake, setShake] = useState(false);
   const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
+  const [correctTextKey, setCorrectTextKey] = useState(0); // 0 = hidden, >0 = showing (timestamp)
+  const correctTextTimeoutRef = useRef(null);
   const [animState, setAnimState] = useState('idle'); // 'idle' | 'out' | 'in'
   const [shatterPieces, setShatterPieces] = useState([]);
 
@@ -111,6 +113,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     }
     return () => {
       if (timerRef.current) cancelAnimationFrame(timerRef.current);
+      if (correctTextTimeoutRef.current) clearTimeout(correctTextTimeoutRef.current);
     };
   }, [countdown]);
 
@@ -174,6 +177,22 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
       sound.playDelete();
       triggerShake();
     }
+
+    const ansStr = String(problem.ans);
+    if (val.length >= ansStr.length) {
+      if (val === ansStr) {
+        setFeedback('correct');
+        setCorrectTextKey(Date.now());
+        if (correctTextTimeoutRef.current) clearTimeout(correctTextTimeoutRef.current);
+        correctTextTimeoutRef.current = setTimeout(() => setCorrectTextKey(0), 800);
+
+        setCorrectCount((c) => c + 1);
+        sound.playCorrect();
+        triggerShake();
+        setAnimState('out');
+        handleNextProblem(true);
+      }
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -181,6 +200,10 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     if (e.key === 'Enter' && inputVal.length > 0) {
       if (inputVal === String(problem.ans)) {
         setFeedback('correct');
+        setCorrectTextKey(Date.now());
+        if (correctTextTimeoutRef.current) clearTimeout(correctTextTimeoutRef.current);
+        correctTextTimeoutRef.current = setTimeout(() => setCorrectTextKey(0), 800);
+
         setCorrectCount((c) => c + 1);
         sound.playCorrect();
         setAnimState('out');
@@ -191,7 +214,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
         sound.playWrong();
         triggerShake();
 
-        const chars = `${problem.n1} ${problem.op || 'x'} ${problem.n2} = ${inputVal}`.split('');
+        const chars = `${problem.n1} ${problem.op || 'x'} ${problem.n2} = ${val}`.split('');
         const pieces = chars.map((ch) => ({
           char: ch,
           x: (Math.random() - 0.5) * 450,
@@ -302,7 +325,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
         {/* Feedback Text above equation */}
         <div className="feedback-banner">
-          {feedback === 'correct' && <span className="feedback-text correct">정답!</span>}
+          {correctTextKey > 0 && <span key={correctTextKey} className="feedback-text correct">정답!</span>}
           {feedback === 'wrong' && <span className="feedback-text wrong">오답!</span>}
         </div>
 
