@@ -56,6 +56,8 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
   // Visual effects states
   const [shake, setShake] = useState(false);
   const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
+  const [banner, setBanner] = useState(null); // { type: 'correct' | 'wrong', id: number } | null
+  const bannerTimeoutRef = useRef(null);
   const [animState, setAnimState] = useState('idle'); // 'idle' | 'out' | 'in'
   const [shatterPieces, setShatterPieces] = useState([]);
   
@@ -111,6 +113,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     }
     return () => {
       if (timerRef.current) cancelAnimationFrame(timerRef.current);
+      if (bannerTimeoutRef.current) clearTimeout(bannerTimeoutRef.current);
     };
   }, [countdown]);
 
@@ -149,7 +152,7 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
           isTransitioningRef.current = false;
           if (inputRef.current) inputRef.current.focus({ preventScroll: true });
         }, 150);
-      }, isCorrect ? 500 : 800);
+      }, isCorrect ? 100 : 800);
     }
   }, [correctCount, wrongCount, elapsedMs, mode, onGameOver]);
 
@@ -181,12 +184,20 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
     if (e.key === 'Enter' && inputVal.length > 0) {
       if (inputVal === String(problem.ans)) {
         setFeedback('correct');
+        setBanner({ type: 'correct', id: Date.now() });
+        if (bannerTimeoutRef.current) clearTimeout(bannerTimeoutRef.current);
+        bannerTimeoutRef.current = setTimeout(() => setBanner(null), 500);
+
         setCorrectCount((c) => c + 1);
         sound.playCorrect();
         setAnimState('out');
         handleNextProblem(true);
       } else {
         setFeedback('wrong');
+        setBanner({ type: 'wrong', id: Date.now() });
+        if (bannerTimeoutRef.current) clearTimeout(bannerTimeoutRef.current);
+        bannerTimeoutRef.current = setTimeout(() => setBanner(null), 800);
+
         setWrongCount((w) => w + 1);
         sound.playWrong();
         triggerShake();
@@ -302,13 +313,13 @@ export default function GameScreen({ mode = 'normal', onGameOver, onQuit }) {
 
         {/* Feedback Text above equation */}
         <div className="feedback-banner">
-          {feedback === 'correct' && <span className="feedback-text correct">정답!</span>}
-          {feedback === 'wrong' && <span className="feedback-text wrong">오답!</span>}
+          {banner?.type === 'correct' && <span key={`correct-${banner.id}`} className="feedback-text correct">정답!</span>}
+          {banner?.type === 'wrong' && <span key={`wrong-${banner.id}`} className="feedback-text wrong">오답!</span>}
         </div>
 
         {/* Correct feedback: Donut Ring & Stars (behind letters) */}
-        {feedback === 'correct' && (
-          <div className="correct-burst-container">
+        {banner?.type === 'correct' && (
+          <div key={`burst-${banner.id}`} className="correct-burst-container">
             <div className="donut-ring" />
             <div className="star star-1">★</div>
             <div className="star star-2">★</div>
