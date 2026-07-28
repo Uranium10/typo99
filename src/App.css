@@ -481,7 +481,7 @@
   height: 140px;
   border: 22px solid var(--accent-cyan);
   border-radius: 50%;
-  animation: donut-expand 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: donut-expand 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   box-shadow: 0 0 30px var(--accent-cyan), inset 0 0 30px var(--accent-cyan);
 }
 
