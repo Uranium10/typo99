@@ -31,14 +31,14 @@ export default function BackgroundSpeedLines({ speed = 'normal', mode = 'normal'
           const isMobile = window.innerWidth <= 600;
           
           if (isMobile) {
-            // On mobile, the custom keypad and footer cover the bottom ~45% of the screen.
-            // The visible game board is roughly 5% to 55%. The equation is centered around 22%-38%.
-            // We remap ALL lines to ensure they are visible and strictly fall into the empty spaces
-            // ABOVE (5% ~ 20%) and BELOW (40% ~ 55%) the equation.
+            // On mobile, the custom keypad and footer cover the bottom ~50% of the screen.
+            // The equation text is huge and sits roughly between 18% and 32%.
+            // We perfectly distribute half the lines above the equation (3% ~ 15%) 
+            // and half the lines below the equation (36% ~ 48%) to frame it beautifully.
             if (idx % 2 === 0) {
-              topVal = `${(idx * 7) % 15 + 5}%`;  // Distribute between 5% and 19%
+              topVal = `${3 + (idx / 2) * 2}%`;  // 3, 5, 7, 9, 11, 13, 15%
             } else {
-              topVal = `${(idx * 7) % 15 + 40}%`; // Distribute between 40% and 54%
+              topVal = `${36 + ((idx - 1) / 2) * 2}%`; // 36, 38, 40, 42, 44, 46, 48%
             }
           } else {
             // On desktop, clear the center area (28% to 72%)
